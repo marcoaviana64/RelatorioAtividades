@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relatório de Controle de Atividades — TI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+    color: white;
+    padding: 28px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px; }
+  .header p { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
+  .header-badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  /* FILTERS */
+  .filters {
+    background: white;
+    padding: 16px 40px;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .filter-label { font-size: 0.8rem; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+  .filters select, .filters input {
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+    color: #333;
+    background: #fafafa;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filters select:focus, .filters input:focus { border-color: #0f3460; }
+  .btn-reset {
+    background: #0f3460;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-reset:hover { background: #16213e; }
+
+  /* MAIN */
+  .main { padding: 28px 40px; max-width: 1600px; margin: 0 auto; }
+
+  /* KPI CARDS */
+  .kpi-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 28px; }
+  .kpi-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    border-left: 5px solid var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kpi-card .kpi-value { font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; }
+  .kpi-card .kpi-label { font-size: 0.78rem; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+  .kpi-card .kpi-sub { font-size: 0.78rem; color: #aaa; margin-top: 2px; }
+
+  /* CHARTS ROW */
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .card {
+    background: white;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  .card h3 { font-size: 0.88rem; font-weight: 700; color: #444; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+  .chart-wrap { position: relative; height: 240px; }
+  .chart-wrap-lg { position: relative; height: 280px; }
+
+  /* HEATMAP TABLE */
+  .heatmap-wrap { overflow-x: auto; }
+  .heatmap-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .heatmap-table th {
+    background: #0f3460;
+    color: white;
+    padding: 9px 14px;
+    text-align: center;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .heatmap-table th.emp-col { text-align: left; min-width: 90px; }
+  .heatmap-table td { padding: 8px 10px; text-align: center; border-bottom: 1px solid #f0f2f5; font-weight: 600; }
+  .heatmap-table td.emp-name { text-align: left; font-weight: 700; color: #0f3460; padding-left: 14px; }
+  .heatmap-table tr:hover td { background: #f5f7fa !important; }
+  .heatmap-table tfoot td { background: #f0f2f5; font-weight: 800; color: #333; border-top: 2px solid #0f3460; }
+
+  /* DETAIL TABLE */
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .detail-table thead th {
+    background: #0f3460;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    cursor: pointer;
+    user-select: none;
+  }
+  .detail-table thead th:hover { background: #1a4a7a; }
+  .detail-table tbody tr:nth-child(even) { background: #fafafa; }
+  .detail-table tbody tr:hover { background: #eef3ff; }
+  .detail-table td { padding: 8px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+  .detail-table td.motivo { max-width: 300px; }
+  .table-wrap { max-height: 420px; overflow-y: auto; border-radius: 10px; border: 1px solid #e8e8e8; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .badge-fechado { background: #d4edda; color: #155724; }
+  .badge-aberto  { background: #fff3cd; color: #856404; }
+  .badge-suporte { background: #cce5ff; color: #004085; }
+  .badge-consultoria { background: #e2d9f3; color: #3d1a78; }
+  .badge-software { background: #d1ecf1; color: #0c5460; }
+
+  /* Section title */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f3460;
+    margin: 8px 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(to right, #0f3460 0%, transparent 100%);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 900px) {
+    .charts-row, .charts-row-3 { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    .header { padding: 20px 16px; flex-direction: column; gap: 12px; align-items: flex-start; }
+    .filters { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>📊 Relatório de Controle de Atividades — TI</h1>
+    <p>Visibilidade por empreendimento · Ano/Mês · Status · Tipo</p>
+  </div>
+  <div class="header-badge" id="headerPeriod">2026</div>
+</div>
+
+<div class="filters">
+  <span class="filter-label">Filtros</span>
+  <select id="filterAno"><option value="">Todos os anos</option></select>
+  <select id="filterMes"><option value="">Todos os meses</option></select>
+  <select id="filterEmp"><option value="">Todos os empreendimentos</option></select>
+  <select id="filterStatus"><option value="">Todos os status</option></select>
+  <select id="filterTipo"><option value="">Todos os tipos</option></select>
+  <button class="btn-reset" onclick="resetFilters()">✕ Limpar</button>
+  <span style="margin-left:auto;font-size:0.8rem;color:#888;" id="countBadge"></span>
+</div>
+
+<div class="main">
+
+  <!-- KPIs -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- Heatmap -->
+  <div class="section-title">Tarefas por Empreendimento × Mês</div>
+  <div class="card" style="margin-bottom:24px;">
+    <div class="heatmap-wrap" id="heatmapWrap"></div>
+  </div>
+
+  <!-- Charts row 1 -->
+  <div class="charts-row">
+    <div class="card">
+      <h3>Tarefas por Empreendimento</h3>
+      <div class="chart-wrap"><canvas id="chartEmp"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Evolução Mensal (Tarefas)</h3>
+      <div class="chart-wrap"><canvas id="chartMensal"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Charts row 2 -->
+  <div class="charts-row-3">
+    <div class="card">
+      <h3>Status Geral</h3>
+      <div class="chart-wrap"><canvas id="chartStatus"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Tipo de Atividade</h3>
+      <div class="chart-wrap"><canvas id="chartTipo"></canvas></div>
+    </div>
+    <div class="card">
+      <h3>Status por Empreendimento</h3>
+      <div class="chart-wrap"><canvas id="chartStatusEmp"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Detail table -->
+  <div class="section-title">Detalhamento das Tarefas</div>
+  <div class="card">
+    <div class="table-wrap">
+      <table class="detail-table">
+        <thead>
+          <tr>
+            <th onclick="sortTable('id')">#</th>
+            <th onclick="sortTable('data')">Data ↕</th>
+            <th onclick="sortTable('empreendimento')">Empreendimento ↕</th>
+            <th onclick="sortTable('tipo')">Tipo ↕</th>
+            <th onclick="sortTable('status')">Status ↕</th>
+            <th>Motivo / Tarefa</th>
+            <th onclick="sortTable('solicitante')">Solicitante ↕</th>
+            <th onclick="sortTable('data_final')">Conclusão ↕</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const MESES = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+const MESES_FULL = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+const PALETTE = ['#0f3460','#e94560','#533483','#0a9396','#ee9b00','#94d2bd','#ae2012','#005f73','#9b2226','#ca6702','#bb3e03','#001219'];
+const EMPs = ['ARGO','IGU','IMC','Rio2Pom','SCP','SHD','SIP','SPS','STQ','SVS','VSS'];
+
+const RAW = [{"id":1,"data":"2026-01-22","ano":2026,"mes":1,"empreendimento":"SCP","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Suporte TI","status":"Aberto","motivo":"Passar dominio shoppingcampinas.com.br para CNPJ do shopping","solicitante":null,"data_final":null},{"id":2,"data":"2026-01-24","ano":2026,"mes":1,"empreendimento":"VSS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Habilitar rede para sala de reunião criada no Vogue","solicitante":null,"data_final":"2026-01-24"},{"id":3,"data":"2026-01-27","ano":2026,"mes":1,"empreendimento":"IGU","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar cameras no computador da Anny","solicitante":null,"data_final":"2026-01-27"},{"id":4,"data":"2026-01-27","ano":2026,"mes":1,"empreendimento":"Rio2Pom","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Consultoria TI","status":"Aberto","motivo":"Levantamento e alinhamento do ambiente de TI do Rio2 e Peninsula","solicitante":null,"data_final":null},{"id":5,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Liberar acesso a pasta Comercial ","solicitante":"Juliana Amora","data_final":"2026-04-28"},{"id":6,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar a pasta Comercial copiando da pasta que fica no financeiro separando as pastas","solicitante":"Juliana Amora","data_final":"2026-04-28"},{"id":7,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Dar acesso a pasta comercial para Gerentes, superintendente e comercial","solicitante":"Juliana Amora","data_final":"2026-04-28"},{"id":8,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Instalar programa de controle do relogio de energia Vinicius","solicitante":"Vinicios","data_final":"2026-04-22"},{"id":9,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Instalar programa de controle do relogio de energia 2 Vinucius","solicitante":"Vinicios","data_final":"2026-04-22"},{"id":10,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Fazer atualizações perfis dos computadores do SAC mudando a senha de acesso do financeiro","solicitante":"Juliana Amora","data_final":"2026-04-28"},{"id":11,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"IGU","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Fechado","motivo":"Configurar cameras nova no NVR do SPSUL","solicitante":"Barbara","data_final":"2026-04-22"},{"id":12,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"VSS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Fechado","motivo":"Aplicativo Bradesco com erro pedindo sempre para baixar o componente Jessica","solicitante":"Jessica Uroda","data_final":"2026-04-23"},{"id":13,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"Rio2Pom","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Consultoria TI","status":"Aberto","motivo":"Passar dominio rio2pom.com.br para CNPJ do shopping","solicitante":null,"data_final":null},{"id":14,"data":"2026-04-22","ano":2026,"mes":4,"empreendimento":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Consultoria TI","status":"Aberto","motivo":"Analise de todos os registros.br em nome de MV e passar para TI","solicitante":null,"data_final":null},{"id":15,"data":"2026-04-28","ano":2026,"mes":4,"empreendimento":"IGU","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Liberar acesso as cameras para Anny","solicitante":"Jessica","data_final":"2026-04-28"},{"id":16,"data":"2026-04-28","ano":2026,"mes":4,"empreendimento":"VSS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Acompanhar assembleia dia 29/04/26","solicitante":"Leonardo Rebouças","data_final":"2026-04-28"},{"id":17,"data":"2026-05-04","ano":2026,"mes":5,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Trocar email paula.brito para raynara.araujo","solicitante":"Juiana Amora","data_final":"2026-05-06"},{"id":17,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Instalar perfil raynara.araujo","solicitante":"Thierry","data_final":"2026-05-06"},{"id":18,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Instalar programa NOVACLT de aesso ao painel LED","solicitante":"Karina MKT","data_final":"2026-05-06"},{"id":18,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Conversar com a empresa que vai treinar o acesso ao painel LED ver forma de acesso","solicitante":"Karina MKT","data_final":"2026-05-15"},{"id":18,"data":"2026-05-13","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"O shopping não tem acesso ao computador que tem o sistema para a tela de LED","solicitante":"Karina MKT","data_final":"2026-05-13"},{"id":18,"data":"2026-05-13","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Liberar acesso ao novo gerenciador do serviço painel LED","solicitante":"Karina MKT","data_final":"2026-05-15"},{"id":18,"data":"2026-05-17","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Computador usado para videos painel LED sem licença Windows10 desligando","solicitante":"Karina MKT","data_final":"2026-05-17"},{"id":18,"data":"2026-05-18","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Acompanhar treinamento para colocar arquivos na lista do painel LED","solicitante":"Karina MKT","data_final":"2026-05-18"},{"id":18,"data":"2026-05-18","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Computador usado para videos painel LED sem licença Windows10 desligando","solicitante":"Karina MKT","data_final":"2026-05-18"},{"id":18,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Instalei um desktop optiplex 3010 provisorio ate o shopping comprar um","solicitante":"Karina MKT","data_final":"2026-05-19"},{"id":19,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar mensagem de férias do Rafael","solicitante":"Rafael","data_final":"2026-05-06"},{"id":20,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Aberto","motivo":"Liberar pasta DP e ver o Ítau","solicitante":"Bianca","data_final":null},{"id":21,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Suporte TI","status":"Fechado","motivo":"Cadu precisa saber onde estão os backup do ambiente nuvem Argo","solicitante":"Cadu JLL","data_final":"2026-05-06"},{"id":22,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SHD","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Software","status":"Aberto","motivo":"Acompanhamento movimentação contratos SYN -> Shopping D","solicitante":"Leandro","data_final":null},{"id":22,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SHD","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Software","status":"Fechado","motivo":"Contrato SOVOS: Pedido para não renovar foi solicitado vence 31/05/2026","solicitante":"Daniela SHD","data_final":"2026-05-06"},{"id":23,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"IGU","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Suporte TI","status":"Fechado","motivo":"Conversar com a empresa que vai fazer envios de emails para iguardei Rodrigo Oliveira","solicitante":"Daniela iGuardei","data_final":"2026-05-06"},{"id":24,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Aberto","motivo":"Fabiano Guedes MKT sem licença standard usando licença Basic","solicitante":null,"data_final":null},{"id":24,"data":"2026-05-06","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Analise de licenças O365 para definir se temos que comprar mais uma ou usar existente para o Fabiano Guedes","solicitante":"Mariana","data_final":"2026-05-20"},{"id":25,"data":"2026-05-07","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Fechado","motivo":"Instalaçao Cloude IA no notebook do Leonardo Rebouças","solicitante":"Leonardo Rebouças","data_final":"2026-05-07"},{"id":26,"data":"2026-05-11","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Solicitação de reset senha lucas.oliveira feito pela Kelly","solicitante":"Kelly","data_final":"2026-05-11"},{"id":27,"data":"2026-05-11","ano":2026,"mes":5,"empreendimento":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Consultoria TI","status":"Fechado","motivo":"Cadu precisa saber sobre a conta do Zoom","solicitante":"Cadu JLL","data_final":"2026-05-11"},{"id":31,"data":"2026-05-12","ano":2026,"mes":5,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar todas as antenas de wifi do mall gerenciado pela Zoox","solicitante":"Thierry","data_final":"2026-05-12"},{"id":32,"data":"2026-05-12","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"E-Mail do cobranca não aparece no outlook","solicitante":"Kelly ","data_final":"2026-05-13"},{"id":33,"data":"2026-05-12","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Aberto","motivo":"Whatapp não esta abrindo arquivos e nem baixando","solicitante":"Concierg","data_final":null},{"id":34,"data":"2026-05-12","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint para o shopping trocar arquivos com a contabilidade ","solicitante":"Jessica Uroda","data_final":"2026-05-21"},{"id":35,"data":"2026-05-12","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint para o shopping trocar arquivos com o back office","solicitante":"Jessica Uroda","data_final":"2026-05-21"},{"id":36,"data":"2026-05-14","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint para o shopping trocar arquivos entre todos da adm ","solicitante":"Lethicia Operação","data_final":"2026-05-21"},{"id":37,"data":"2026-05-13","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint para o concierge (Recepção da adm)","solicitante":"Concierge","data_final":"2026-05-21"},{"id":38,"data":"2026-05-14","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Verificar cada setor quem tem acesso","solicitante":"Mariana","data_final":"2026-05-25"},{"id":39,"data":"2026-05-14","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Dar acesso de envio para Anna e Jessica no email boletos@voguesquare.com.br","solicitante":"Anna","data_final":"2026-05-14"},{"id":40,"data":"2026-05-15","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Notebook Kelly avisando que esta ficando sem espaço em disco ","solicitante":"RMM","data_final":"2026-05-15"},{"id":41,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Solicitando atualização grupo contasapagar@itaboraiplaza ","solicitante":"Mariana","data_final":null},{"id":42,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Fechado","motivo":"Configurar plugin Bradesco","solicitante":"Jean","data_final":"2026-05-25"},{"id":43,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Aberto","motivo":"Configurar plugin Bradesco","solicitante":"Karina MKT","data_final":null},{"id":44,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Software","status":"Fechado","motivo":"Robson informando que o email dele não esta recebendo mensagens","solicitante":"Robson","data_final":"2026-05-25"},{"id":45,"data":"2026-05-19","ano":2026,"mes":5,"empreendimento":"IGU","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Reset notebok que era usado pelo Hugo para a Daniela passar a usar","solicitante":"Daniela","data_final":"2026-05-19"},{"id":46,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Notebook que era do Lucas com tela azul pedindo bitlocker","solicitante":"Kelly Virginia","data_final":"2026-05-25"},{"id":47,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Arquitetura","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":48,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Auditoria","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":49,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Comercial","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":50,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Financeiro","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":51,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Juridico","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":52,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint MalleMidia","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":53,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint Operação","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":54,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint RH","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":55,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Criar setor sharepoint TI","solicitante":"Hugo Nevares","data_final":"2026-05-30"},{"id":56,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Arquitetura","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":57,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Auditoria","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":58,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Comercial","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":59,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Financeiro","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":60,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Juridico","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":61,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint MalleMidia","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":62,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint Operação","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":63,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint RH","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":64,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Upload arquivos locais para o setor sharepoint TI","solicitante":"Hugo Nevares","data_final":"2026-05-31"},{"id":65,"data":"2026-05-21","ano":2026,"mes":5,"empreendimento":"STQ","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Acompanhar instalação programa wps no computador estacionamento","solicitante":null,"data_final":"2026-05-21"},{"id":66,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Pastas do servidor não estavam disponiveis","solicitante":"Hugo Nevares","data_final":"2026-05-25"},{"id":67,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Disco ficando sem espaço C:","solicitante":"Hugo Nevares","data_final":"2026-05-25"},{"id":68,"data":"2026-05-25","ano":2026,"mes":5,"empreendimento":"SVS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Arquivo em excel falhando ao abrir, arquivo exportado do group","solicitante":"Jessica","data_final":"2026-05-25"},{"id":69,"data":"2026-05-26","ano":2026,"mes":5,"empreendimento":"IMC","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar o calendario do office365 no iphone","solicitante":"Juliana Amora","data_final":"2026-05-26"},{"id":70,"data":"2026-05-26","ano":2026,"mes":5,"empreendimento":"IGU","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Barbara informando que o link de internet no Americas cai todo dia","solicitante":"Barbara","data_final":"2026-05-26"},{"id":71,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SIP","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Rafael Operações com ssd256 sem espaço","solicitante":"Rafael","data_final":"2026-05-27"},{"id":72,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"Rio2Pom","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Riam precisando de aplicativo para rodar videos","solicitante":"Rian","data_final":"2026-05-27"},{"id":73,"data":"2026-05-27","ano":2026,"mes":5,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Hugo solicitou remover email de lista de distribuiçao do jurdico","solicitante":"Hugo Nevares","data_final":"2026-05-27"},{"id":74,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Auditoria Shopping ParkSul","data_final":null},{"id":75,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Alfredo Zanotta","data_final":"2026-06-01"},{"id":75,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Verfificar pasta financeiro que não sincronizou","solicitante":"Alfredo Zanotta","data_final":"2026-06-02"},{"id":76,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Cintia Camilo","data_final":"2026-06-01"},{"id":77,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Diogo Oliveira","data_final":"2026-06-01"},{"id":78,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Estacionamento Shopping Park Sul","data_final":"2026-06-01"},{"id":79,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Fernando Oliveira","data_final":"2026-06-01"},{"id":80,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Financeiro Park Sul","data_final":"2026-06-01"},{"id":81,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Hugo Nevares","data_final":"2026-06-01"},{"id":82,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Aberto","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Juliana Caneda","data_final":null},{"id":83,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Aberto","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Marketing","data_final":null},{"id":84,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Operacoes","data_final":"2026-06-01"},{"id":85,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Qualidade Shopping Park Sul","data_final":"2026-06-01"},{"id":86,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Aberto","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Recepção","data_final":null},{"id":87,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Relacionamento","data_final":"2026-06-01"},{"id":88,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Rodrigo Mattos","data_final":"2026-06-02"},{"id":89,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Rodrigo Ramos","data_final":"2026-06-01"},{"id":90,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Fechado","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Thais Cardoso","data_final":"2026-06-01"},{"id":91,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Suporte TI","status":"Aberto","motivo":"Configurar pastas sharepoint corporativo remotamente","solicitante":"Tiago Garcia","data_final":null},{"id":92,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"Rio2Pom","tipo":"Software","status":"Fechado","motivo":"Hanna precisa instalar programa do CFTV, antivirus bloqueando meu login tambem","solicitante":"Hanna","data_final":"2026-06-01"},{"id":92,"data":"2026-06-01","ano":2026,"mes":6,"empreendimento":"Rio2Pom","tipo":"Software","status":"Fechado","motivo":"Hanna precisa instalarpacote de idiomas do CFTV, tentando acesso e ela não responde","solicitante":"Hanna","data_final":"2026-06-01"},{"id":92,"data":"2026-06-02","ano":2026,"mes":6,"empreendimento":"Rio2Pom","tipo":"Software","status":"Fechado","motivo":"Hanna precisa instalarpacote de idiomas do CFTV, tentando acesso e ela não responde","solicitante":"Hanna","data_final":"2026-06-02"},{"id":93,"data":"2026-06-02","ano":2026,"mes":6,"empreendimento":"IMC","tipo":"Software","status":"Fechado","motivo":"trocar o numero celular da conta daniel.vianna@multicenteritaipu.com.br para (11) 95268-4036","solicitante":"Daniel Vianna","data_final":"2026-06-02"},{"id":94,"data":"2026-06-02","ano":2026,"mes":6,"empreendimento":"Rio2Pom","tipo":"Software","status":"Aberto","motivo":"Notebook da Hanna não deixa eu instalar como administrador","solicitante":"Hanna","data_final":null},{"id":95,"data":"2026-06-02","ano":2026,"mes":6,"empreendimento":"SPS","tipo":"Software","status":"Fechado","motivo":"computador auditoria não consegue baixar arquivos","solicitante":"Joyce","data_final":"2026-06-02"}];
+
+let charts = {};
+let sortCol = 'data', sortAsc = true;
+let filtered = [...RAW];
+
+// --- Populate filter dropdowns ---
+function populateFilters() {
+  const anos = [...new Set(RAW.map(r => r.ano))].sort();
+  const meses = [...new Set(RAW.map(r => r.mes))].sort((a,b)=>a-b);
+  const emps = [...new Set(RAW.map(r => r.empreendimento))].sort();
+  const statuses = [...new Set(RAW.map(r => r.status))].sort();
+  const tipos = [...new Set(RAW.map(r => r.tipo).filter(Boolean))].sort();
+
+  const sel = (id, vals, fmt) => {
+    const el = document.getElementById(id);
+    vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = fmt ? fmt(v) : v; el.appendChild(o); });
+  };
+  sel('filterAno', anos);
+  sel('filterMes', meses, m => MESES_FULL[m]);
+  sel('filterEmp', emps);
+  sel('filterStatus', statuses);
+  sel('filterTipo', tipos);
+  ['filterAno','filterMes','filterEmp','filterStatus','filterTipo'].forEach(id => {
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+}
+
+function getFilters() {
+  return {
+    ano: document.getElementById('filterAno').value,
+    mes: document.getElementById('filterMes').value,
+    emp: document.getElementById('filterEmp').value,
+    status: document.getElementById('filterStatus').value,
+    tipo: document.getElementById('filterTipo').value,
+  };
+}
+
+function applyFilters() {
+  const f = getFilters();
+  filtered = RAW.filter(r =>
+    (!f.ano    || r.ano == f.ano) &&
+    (!f.mes    || r.mes == f.mes) &&
+    (!f.emp    || r.empreendimento === f.emp) &&
+    (!f.status || r.status === f.status) &&
+    (!f.tipo   || r.tipo === f.tipo)
+  );
+  renderAll();
+}
+
+function resetFilters() {
+  ['filterAno','filterMes','filterEmp','filterStatus','filterTipo'].forEach(id => document.getElementById(id).value = '');
+  filtered = [...RAW];
+  renderAll();
+}
+
+// --- Helpers ---
+function count(data, key) {
+  return data.reduce((acc, r) => { acc[r[key]] = (acc[r[key]]||0)+1; return acc; }, {});
+}
+
+function heatColor(val, max) {
+  if (!val) return '#f9f9f9';
+  const pct = val / max;
+  if (pct < 0.25) return '#dbeafe';
+  if (pct < 0.5)  return '#93c5fd';
+  if (pct < 0.75) return '#3b82f6';
+  return '#1d4ed8';
+}
+
+// --- KPI ---
+function renderKPI() {
+  const total = filtered.length;
+  const fechado = filtered.filter(r => r.status === 'Fechado').length;
+  const aberto = filtered.filter(r => r.status === 'Aberto').length;
+  const emps = new Set(filtered.map(r => r.empreendimento)).size;
+  const meses = new Set(filtered.map(r => `${r.ano}-${r.mes}`)).size;
+  const taxa = total ? Math.round(fechado/total*100) : 0;
+
+  const kpis = [
+    { value: total,   label: 'Total de Tarefas',     sub: `${meses} mes(es)`,         accent: '#0f3460' },
+    { value: fechado, label: 'Fechadas',              sub: `${taxa}% resolução`,        accent: '#10b981' },
+    { value: aberto,  label: 'Em Aberto',             sub: 'pendentes',                 accent: '#f59e0b' },
+    { value: emps,    label: 'Empreendimentos',       sub: 'ativos no período',          accent: '#6366f1' },
+    { value: taxa+'%',label: 'Taxa de Resolução',     sub: 'fechado/total',             accent: '#0ea5e9' },
+  ];
+
+  document.getElementById('kpiRow').innerHTML = kpis.map(k => `
+    <div class="kpi-card" style="--accent:${k.accent}">
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`).join('');
+
+  document.getElementById('countBadge').textContent = `${total} tarefas exibidas`;
+}
+
+// --- Heatmap ---
+function renderHeatmap() {
+  const months = [...new Set(filtered.map(r => `${r.ano}-${String(r.mes).padStart(2,'0')}`))].sort();
+  const emps = [...new Set(filtered.map(r => r.empreendimento))].sort();
+
+  // Build matrix
+  const matrix = {};
+  const totals = {};
+  emps.forEach(e => { matrix[e] = {}; months.forEach(m => matrix[e][m] = 0); totals[e] = 0; });
+  filtered.forEach(r => {
+    const key = `${r.ano}-${String(r.mes).padStart(2,'0')}`;
+    if (matrix[r.empreendimento]) { matrix[r.empreendimento][key]++; totals[r.empreendimento]++; }
+  });
+  const maxVal = Math.max(...emps.flatMap(e => months.map(m => matrix[e][m])));
+  const monthTotals = {};
+  months.forEach(m => monthTotals[m] = emps.reduce((s,e) => s + (matrix[e][m]||0), 0));
+
+  const monthLabel = m => {
+    const [y, mo] = m.split('-');
+    return `${MESES[parseInt(mo)]}/${y.slice(2)}`;
+  };
+
+  let html = `<table class="heatmap-table">
+    <thead><tr>
+      <th class="emp-col">Empreendimento</th>
+      ${months.map(m => `<th>${monthLabel(m)}</th>`).join('')}
+      <th>Total</th>
+    </tr></thead>
+    <tbody>`;
+
+  emps.forEach(e => {
+    html += `<tr><td class="emp-name">${e}</td>`;
+    months.forEach(m => {
+      const v = matrix[e][m] || 0;
+      const bg = heatColor(v, maxVal);
+      const fg = v > 0 && maxVal > 0 && v/maxVal > 0.5 ? 'white' : '#333';
+      html += `<td style="background:${bg};color:${fg}">${v || '—'}</td>`;
+    });
+    html += `<td style="font-weight:800;color:#0f3460">${totals[e]}</td></tr>`;
+  });
+
+  html += `</tbody><tfoot><tr>
+    <td>Total</td>
+    ${months.map(m => `<td>${monthTotals[m]}</td>`).join('')}
+    <td>${filtered.length}</td>
+  </tr></tfoot></table>`;
+
+  document.getElementById('heatmapWrap').innerHTML = html;
+}
+
+// --- Charts ---
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderCharts() {
+  // By Empreendimento
+  destroyChart('chartEmp');
+  const empCount = count(filtered, 'empreendimento');
+  const empLabels = Object.keys(empCount).sort((a,b) => empCount[b]-empCount[a]);
+  charts['chartEmp'] = new Chart(document.getElementById('chartEmp'), {
+    type: 'bar',
+    data: {
+      labels: empLabels,
+      datasets: [{ data: empLabels.map(k => empCount[k]), backgroundColor: PALETTE, borderRadius: 6 }]
+    },
+    options: { plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{stepSize:1}}, x:{ticks:{font:{size:11}}} }, responsive:true, maintainAspectRatio:false }
+  });
+
+  // Monthly evolution
+  destroyChart('chartMensal');
+  const monthKeys = [...new Set(filtered.map(r => `${r.ano}-${String(r.mes).padStart(2,'0')}`))].sort();
+  const monthLabel = m => { const [y,mo] = m.split('-'); return `${MESES[parseInt(mo)]}/${y.slice(2)}`; };
+  const monthData = monthKeys.map(m => filtered.filter(r => `${r.ano}-${String(r.mes).padStart(2,'0')}` === m).length);
+  const monthFechado = monthKeys.map(m => filtered.filter(r => `${r.ano}-${String(r.mes).padStart(2,'0')}` === m && r.status==='Fechado').length);
+  charts['chartMensal'] = new Chart(document.getElementById('chartMensal'), {
+    type: 'line',
+    data: {
+      labels: monthKeys.map(monthLabel),
+      datasets: [
+        { label:'Total', data: monthData, borderColor:'#0f3460', backgroundColor:'rgba(15,52,96,0.1)', fill:true, tension:0.3, pointRadius:5 },
+        { label:'Fechadas', data: monthFechado, borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.3, pointRadius:5 }
+      ]
+    },
+    options: { plugins:{legend:{position:'bottom'}}, scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}, responsive:true, maintainAspectRatio:false }
+  });
+
+  // Status donut
+  destroyChart('chartStatus');
+  const sc = count(filtered, 'status');
+  charts['chartStatus'] = new Chart(document.getElementById('chartStatus'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(sc), datasets:[{ data:Object.values(sc), backgroundColor:['#10b981','#f59e0b'], borderWidth:2 }] },
+    options: { plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false, cutout:'60%' }
+  });
+
+  // Tipo donut
+  destroyChart('chartTipo');
+  const tc = count(filtered.filter(r=>r.tipo), 'tipo');
+  charts['chartTipo'] = new Chart(document.getElementById('chartTipo'), {
+    type: 'doughnut',
+    data: { labels: Object.keys(tc), datasets:[{ data:Object.values(tc), backgroundColor:['#0f3460','#6366f1','#0ea5e9'], borderWidth:2 }] },
+    options: { plugins:{legend:{position:'bottom'}}, responsive:true, maintainAspectRatio:false, cutout:'60%' }
+  });
+
+  // Status by empreendimento stacked
+  destroyChart('chartStatusEmp');
+  const empList = [...new Set(filtered.map(r=>r.empreendimento))].sort();
+  const fechadoByEmp = empList.map(e => filtered.filter(r=>r.empreendimento===e&&r.status==='Fechado').length);
+  const abertoByEmp  = empList.map(e => filtered.filter(r=>r.empreendimento===e&&r.status==='Aberto').length);
+  charts['chartStatusEmp'] = new Chart(document.getElementById('chartStatusEmp'), {
+    type: 'bar',
+    data: {
+      labels: empList,
+      datasets: [
+        { label:'Fechado', data:fechadoByEmp, backgroundColor:'#10b981', borderRadius:4 },
+        { label:'Aberto',  data:abertoByEmp,  backgroundColor:'#f59e0b', borderRadius:4 }
+      ]
+    },
+    options: { plugins:{legend:{position:'bottom'}}, scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}}, responsive:true, maintainAspectRatio:false }
+  });
+}
+
+// --- Table ---
+function sortTable(col) {
+  if (sortCol === col) sortAsc = !sortAsc;
+  else { sortCol = col; sortAsc = true; }
+  renderTable();
+}
+
+function renderTable() {
+  const sorted = [...filtered].sort((a, b) => {
+    let va = a[sortCol] ?? '', vb = b[sortCol] ?? '';
+    if (typeof va === 'number') return sortAsc ? va-vb : vb-va;
+    return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  });
+
+  const tipoBadge = t => {
+    if (!t) return '';
+    const cls = t==='Suporte TI' ? 'badge-suporte' : t==='Consultoria TI' ? 'badge-consultoria' : 'badge-software';
+    return `<span class="badge ${cls}">${t}</span>`;
+  };
+
+  document.getElementById('tableBody').innerHTML = sorted.map(r => `
+    <tr>
+      <td>${r.id}</td>
+      <td style="white-space:nowrap">${r.data||''}</td>
+      <td><strong>${r.empreendimento||''}</strong></td>
+      <td>${tipoBadge(r.tipo)}</td>
+      <td><span class="badge ${r.status==='Fechado'?'badge-fechado':'badge-aberto'}">${r.status}</span></td>
+      <td class="motivo">${r.motivo||''}</td>
+      <td>${r.solicitante||'—'}</td>
+      <td style="white-space:nowrap">${r.data_final||'—'}</td>
+    </tr>`).join('');
+}
+
+function renderAll() {
+  renderKPI();
+  renderHeatmap();
+  renderCharts();
+  renderTable();
+}
+
+populateFilters();
+renderAll();
+</script>
+</body>
+</html>
