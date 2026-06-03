@@ -35,12 +35,12 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .chart-wrap{position:relative;height:220px}
 .section-title{font-size:.9rem;font-weight:800;color:#155724;margin:4px 0 12px;display:flex;align-items:center;gap:8px}
 .section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,#155724 0%,transparent 100%);border-radius:2px}
-.table-wrap{max-height:400px;overflow-y:auto;border-radius:10px;border:1px solid #e8e8e8}
+.table-wrap{max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid #e8e8e8}
 .detail-table{width:100%;border-collapse:collapse;font-size:.78rem}
 .detail-table thead th{background:#155724;color:white;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer}
 .detail-table thead th:hover{opacity:.88}
 .detail-table tbody tr:nth-child(even){background:#fafafa}
-.detail-table tbody tr:hover{background:#eef3ff}
+.detail-table tbody tr:hover td{background:#eef3ff}
 .detail-table td{padding:7px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top}
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700}
 .badge-fechado{background:#d4edda;color:#155724}
@@ -50,13 +50,21 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .badge-software{background:#d1ecf1;color:#0c5460}
 .empty{text-align:center;padding:30px;color:#aaa}
 footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px}
+
+.task-row.has-subs:hover td { background: #f0f4ff; }
+.sub-row td { background: #f8f9ff; border-left: 3px solid #155724; }
+.sub-row:last-child td { border-bottom: 2px solid #e8ecff; }
+.expand-icon { font-size: .7rem; color: #155724; margin-right: 2px; }
+.sub-count { display:inline-block; background: #e8ecff; color: #155724; border-radius:10px; padding:1px 7px; font-size:.66rem; font-weight:700; margin-left:4px; }
+.sub-level-badge { display:inline-block; background:#f0f0f0; color:#666; border-radius:10px; padding:1px 7px; font-size:.65rem; font-weight:700; margin-right:4px; }
+
 @media(max-width:800px){.charts-row{grid-template-columns:1fr}.main{padding:14px 14px}}
 </style>
 </head>
 <body>
 <div class="header">
   <div class="header-left">
-    <a class="back-btn" href="index.html">← Voltar</a>
+    <a class="back-btn" id="backBtn" href="index.html" style="display:none">← Voltar</a>
     <div>
       <h1>📋 Relatório de Atividades TI</h1>
       <div class="sub">iGuardei &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div>
@@ -84,6 +92,7 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
   </div>
   <div class="section-title">Detalhamento das Tarefas</div>
   <div class="card">
+    <p style="font-size:.72rem;color:#999;margin-bottom:10px">▶ Clique em uma tarefa com múltiplos andamentos para expandir</p>
     <div class="table-wrap">
       <table class="detail-table">
         <thead><tr>
@@ -108,12 +117,11 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
 <script>
 
 const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const RAW = [{"sub": 1, "data": "2026-01-27", "ano": 2026, "mes": 1, "ano_mes": "2026/01", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Configurar cameras no computador da Anny", "solicitante": null, "data_final": "2026-01-27"}, {"sub": 1, "data": "2026-04-22", "ano": 2026, "mes": 4, "ano_mes": "2026/04", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Software", "status": "Fechado", "motivo": "Configurar cameras nova no NVR do SPSUL", "solicitante": "Barbara", "data_final": "2026-04-22"}, {"sub": 1, "data": "2026-04-28", "ano": 2026, "mes": 4, "ano_mes": "2026/04", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Liberar acesso as cameras para Anny", "solicitante": "Jessica", "data_final": "2026-04-28"}, {"sub": 1, "data": "2026-05-06", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Consultoria/Gerencia Ambiente nuvem Sistema VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Conversar com a empresa que vai fazer envios de emails para iguardei Rodrigo Oliveira", "solicitante": "Daniela iGuardei", "data_final": "2026-05-06"}, {"sub": 1, "data": "2026-05-19", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Reset notebok que era usado pelo Hugo para a Daniela passar a usar", "solicitante": "Daniela", "data_final": "2026-05-19"}, {"sub": 1, "data": "2026-05-26", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Barbara informando que o link de internet no Americas cai todo dia", "solicitante": "Barbara", "data_final": "2026-05-26"}];
+const RAW = [{"sub": 1, "data": "2026-01-27", "ano": 2026, "mes": 1, "ano_mes": "2026/01", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Configurar cameras no computador da Anny", "solicitante": null, "data_final": "2026-01-27", "task_id": 3}, {"sub": 1, "data": "2026-04-22", "ano": 2026, "mes": 4, "ano_mes": "2026/04", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Software", "status": "Fechado", "motivo": "Configurar cameras nova no NVR do SPSUL", "solicitante": "Barbara", "data_final": "2026-04-22", "task_id": 11}, {"sub": 1, "data": "2026-04-28", "ano": 2026, "mes": 4, "ano_mes": "2026/04", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Liberar acesso as cameras para Anny", "solicitante": "Jessica", "data_final": "2026-04-28", "task_id": 15}, {"sub": 1, "data": "2026-05-06", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Consultoria/Gerencia Ambiente nuvem Sistema VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Conversar com a empresa que vai fazer envios de emails para iguardei Rodrigo Oliveira", "solicitante": "Daniela iGuardei", "data_final": "2026-05-06", "task_id": 24}, {"sub": 1, "data": "2026-05-19", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Reset notebok que era usado pelo Hugo para a Daniela passar a usar", "solicitante": "Daniela", "data_final": "2026-05-19", "task_id": 43}, {"sub": 1, "data": "2026-05-26", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "IGU", "shopping": "iGuardei", "atividade": "Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS", "tipo": "Suporte TI", "status": "Fechado", "motivo": "Barbara informando que o link de internet no Americas cai todo dia", "solicitante": "Barbara", "data_final": "2026-05-26", "task_id": 68}];
 const COLOR = '#155724';
-const SHOPPING = 'iGuardei';
-const SIGLA = 'IGU';
 let filtered = [...RAW], sortCol = 'data', sortAsc = true;
 let charts = {};
+let expandedTasks = {};
 
 function populateFilters() {
   const meses = [...new Set(RAW.map(r=>r.mes))].sort((a,b)=>a-b);
@@ -121,119 +129,189 @@ function populateFilters() {
   const tipos = [...new Set(RAW.map(r=>r.tipo).filter(Boolean))].sort();
   function sel(id, vals, fmt) {
     const el = document.getElementById(id);
-    vals.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = fmt ? fmt(v) : v; el.appendChild(o); });
+    vals.forEach(v => { const o = document.createElement('option'); o.value=v; o.textContent=fmt?fmt(v):v; el.appendChild(o); });
   }
-  sel('filterMes', meses, m => MESES[m] || m);
+  sel('filterMes', meses, m => MESES[m]||m);
   sel('filterStatus', statuses);
   sel('filterTipo', tipos);
   ['filterMes','filterStatus','filterTipo'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
 }
 
 function applyFilters() {
-  const mes = document.getElementById('filterMes').value;
-  const status = document.getElementById('filterStatus').value;
-  const tipo = document.getElementById('filterTipo').value;
-  filtered = RAW.filter(r => (!mes || r.mes == mes) && (!status || r.status === status) && (!tipo || r.tipo === tipo));
+  var mes = document.getElementById('filterMes').value;
+  var status = document.getElementById('filterStatus').value;
+  var tipo = document.getElementById('filterTipo').value;
+  // include parent rows (sub=1) if any sub-row matches, plus the sub-rows themselves
+  var matchIds = new Set();
+  RAW.forEach(function(r) {
+    if ((!mes||r.mes==mes)&&(!status||r.status===status)&&(!tipo||r.tipo===tipo)) matchIds.add(r.task_id);
+  });
+  filtered = RAW.filter(r => matchIds.has(r.task_id));
   renderAll();
 }
 
 function resetFilters() {
-  ['filterMes','filterStatus','filterTipo'].forEach(id => document.getElementById(id).value = '');
-  filtered = [...RAW];
-  renderAll();
+  ['filterMes','filterStatus','filterTipo'].forEach(id => document.getElementById(id).value='');
+  filtered=[...RAW]; renderAll();
 }
 
 function renderKPI() {
-  const total = filtered.length;
-  const fechado = filtered.filter(r => r.status === 'Fechado').length;
-  const aberto = filtered.filter(r => r.status === 'Aberto').length;
-  const taxa = total ? Math.round(fechado / total * 100) : 0;
-  const meses = new Set(filtered.map(r => r.mes)).size;
-  const kpis = [
-    { value: total,    label: 'Total de Tarefas', sub: meses + ' mes(es)',   accent: COLOR },
-    { value: fechado,  label: 'Concluídas',        sub: taxa + '% do total', accent: '#10b981' },
-    { value: aberto,   label: 'Em Aberto',          sub: 'pendentes',         accent: '#f59e0b' },
-    { value: taxa+'%', label: 'Taxa Resolução',     sub: 'fechado / total',   accent: '#6366f1' },
+  // Count only sub=1 rows (unique tasks) for total
+  var tasks = filtered.filter(r=>r.sub===1);
+  var total = tasks.length;
+  // A task is "Fechado" if ALL its sub-rows are Fechado
+  var taskIds = [...new Set(tasks.map(r=>r.task_id))];
+  var fechado = taskIds.filter(function(tid) {
+    var subs = filtered.filter(r=>r.task_id===tid);
+    return subs.every(r=>r.status==='Fechado');
+  }).length;
+  var aberto = total - fechado;
+  var taxa = total ? Math.round(fechado/total*100) : 0;
+  var meses = new Set(filtered.map(r=>r.mes)).size;
+  var kpis = [
+    {value:total,    label:'Tarefas (chamados)', sub:meses+' mes(es)',    accent:COLOR},
+    {value:fechado,  label:'Concluídas',          sub:taxa+'% do total',  accent:'#10b981'},
+    {value:aberto,   label:'Em Aberto',            sub:'pendentes',        accent:'#f59e0b'},
+    {value:taxa+'%', label:'Taxa Resolução',       sub:'fechado / total',  accent:'#6366f1'},
   ];
-  document.getElementById('kpiRow').innerHTML = kpis.map(k =>
-    '<div class="kpi-card" style="--accent:' + k.accent + '"><div class="kpi-value">' + k.value +
-    '</div><div class="kpi-label">' + k.label + '</div><div class="kpi-sub">' + k.sub + '</div></div>'
+  document.getElementById('kpiRow').innerHTML = kpis.map(k=>
+    '<div class="kpi-card" style="--accent:'+k.accent+'"><div class="kpi-value">'+k.value+
+    '</div><div class="kpi-label">'+k.label+'</div><div class="kpi-sub">'+k.sub+'</div></div>'
   ).join('');
-  document.getElementById('countBadge').textContent = total + ' tarefas exibidas';
+  document.getElementById('countBadge').textContent = total + ' chamados · ' + filtered.length + ' andamentos';
 }
 
-function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
 
 function renderCharts() {
-  function monthKey(r) { return r.ano + '-' + String(r.mes).padStart(2, '0'); }
-  function monthLabel(m) { var p = m.split('-'); return MESES[parseInt(p[1])] + '/' + p[0].slice(2); }
-  const monthKeys = [...new Set(filtered.map(monthKey))].sort();
+  function monthKey(r){return r.ano+'-'+String(r.mes).padStart(2,'0');}
+  function monthLabel(m){var p=m.split('-');return MESES[parseInt(p[1])]+'/'+p[0].slice(2);}
+  // Only count sub=1 per month for unique tasks
+  var monthKeys=[...new Set(filtered.map(monthKey))].sort();
 
   destroyChart('chartMes');
-  charts['chartMes'] = new Chart(document.getElementById('chartMes'), {
-    type: 'bar',
-    data: {
-      labels: monthKeys.map(monthLabel),
-      datasets: [
-        { label: 'Total',    data: monthKeys.map(m => filtered.filter(r => monthKey(r) === m).length), backgroundColor: COLOR + 'cc', borderRadius: 6 },
-        { label: 'Fechadas', data: monthKeys.map(m => filtered.filter(r => monthKey(r) === m && r.status === 'Fechado').length), backgroundColor: '#10b981cc', borderRadius: 6 }
-      ]
-    },
-    options: { plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false }
+  charts['chartMes']=new Chart(document.getElementById('chartMes'),{
+    type:'bar',
+    data:{labels:monthKeys.map(monthLabel),datasets:[
+      {label:'Chamados',data:monthKeys.map(m=>filtered.filter(r=>monthKey(r)===m&&r.sub===1).length),backgroundColor:COLOR+'cc',borderRadius:6},
+      {label:'Fechados',data:monthKeys.map(m=>{
+        var ids=[...new Set(filtered.filter(r=>monthKey(r)===m&&r.sub===1).map(r=>r.task_id))];
+        return ids.filter(tid=>filtered.filter(r=>r.task_id===tid).every(r=>r.status==='Fechado')).length;
+      }),backgroundColor:'#10b981cc',borderRadius:6}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
   });
 
   destroyChart('chartStatus');
-  const tipos = [...new Set(filtered.map(r => r.tipo).filter(Boolean))];
-  charts['chartStatus'] = new Chart(document.getElementById('chartStatus'), {
-    type: 'bar',
-    data: {
-      labels: tipos,
-      datasets: [
-        { label: 'Fechado', data: tipos.map(t => filtered.filter(r => r.tipo === t && r.status === 'Fechado').length), backgroundColor: '#10b981', borderRadius: 5 },
-        { label: 'Aberto',  data: tipos.map(t => filtered.filter(r => r.tipo === t && r.status === 'Aberto').length),  backgroundColor: '#f59e0b', borderRadius: 5 }
-      ]
-    },
-    options: { plugins: { legend: { position: 'bottom' } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false }
+  var tipos=[...new Set(filtered.map(r=>r.tipo).filter(Boolean))];
+  charts['chartStatus']=new Chart(document.getElementById('chartStatus'),{
+    type:'bar',
+    data:{labels:tipos,datasets:[
+      {label:'Fechado',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Fechado').length),backgroundColor:'#10b981',borderRadius:5},
+      {label:'Aberto', data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Aberto').length), backgroundColor:'#f59e0b',borderRadius:5}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
   });
 }
 
+function toggleTask(tid) {
+  expandedTasks[tid] = !expandedTasks[tid];
+  renderTable();
+}
+
 function sortTable(col) {
-  if (sortCol === col) sortAsc = !sortAsc; else { sortCol = col; sortAsc = true; }
+  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
   renderTable();
 }
 
 function renderTable() {
-  var sorted = [...filtered].sort(function(a, b) {
-    var va = a[sortCol] != null ? a[sortCol] : '';
-    var vb = b[sortCol] != null ? b[sortCol] : '';
-    if (typeof va === 'number') return sortAsc ? va - vb : vb - va;
-    return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+  // Group filtered rows by task_id, maintaining order of first appearance
+  var taskOrder = [];
+  var taskMap = {};
+  filtered.forEach(function(r) {
+    if (!taskMap[r.task_id]) { taskMap[r.task_id]=[]; taskOrder.push(r.task_id); }
+    taskMap[r.task_id].push(r);
   });
-  function tipoBadge(t) {
-    if (!t) return '';
-    var cls = t === 'Suporte TI' ? 'badge-suporte' : t === 'Consultoria TI' ? 'badge-consultoria' : 'badge-software';
-    return '<span class="badge ' + cls + '">' + t + '</span>';
+
+  // Sort task order by the sort column of the parent (sub=1) row
+  taskOrder.sort(function(a,b) {
+    var ra = taskMap[a][0], rb = taskMap[b][0];
+    var va = ra[sortCol]!=null?ra[sortCol]:'';
+    var vb = rb[sortCol]!=null?rb[sortCol]:'';
+    if(typeof va==='number')return sortAsc?va-vb:vb-va;
+    return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+  });
+
+  function tipoBadge(t){
+    if(!t)return'';
+    var cls=t==='Suporte TI'?'badge-suporte':t==='Consultoria TI'?'badge-consultoria':'badge-software';
+    return'<span class="badge '+cls+'">'+t+'</span>';
   }
-  function statusBadge(s) {
-    return '<span class="badge ' + (s === 'Fechado' ? 'badge-fechado' : 'badge-aberto') + '">' + s + '</span>';
+  function statusBadge(s){
+    return'<span class="badge '+(s==='Fechado'?'badge-fechado':'badge-aberto')+'">'+s+'</span>';
   }
-  document.getElementById('tableBody').innerHTML = sorted.length ? sorted.map(function(r) {
-    return '<tr>' +
-      '<td style="white-space:nowrap">' + (r.data || '') + '</td>' +
-      '<td>' + (MESES[r.mes] || r.mes) + '</td>' +
-      '<td>' + tipoBadge(r.tipo) + '</td>' +
-      '<td>' + statusBadge(r.status) + '</td>' +
-      '<td style="max-width:320px">' + (r.motivo || '') + '</td>' +
-      '<td>' + (r.solicitante || '—') + '</td>' +
-      '<td style="white-space:nowrap">' + (r.data_final || '—') + '</td>' +
-      '</tr>';
-  }).join('') : '<tr><td colspan="7" class="empty">Nenhuma tarefa encontrada.</td></tr>';
+
+  var html = '';
+  taskOrder.forEach(function(tid) {
+    var rows = taskMap[tid];
+    var parent = rows[0];
+    var hasSubs = rows.length > 1;
+    var expanded = expandedTasks[tid];
+    var allFechado = rows.every(r=>r.status==='Fechado');
+
+    // Determine overall task status
+    var taskStatus = allFechado ? 'Fechado' : 'Aberto';
+
+    // Parent row
+    html += '<tr class="task-row'+(hasSubs?' has-subs':'')+'" onclick="'+(hasSubs?'toggleTask('+tid+')':'')+'" style="'+(hasSubs?'cursor:pointer':'')+'">';
+    html += '<td style="white-space:nowrap">'+(parent.data||'')+'</td>';
+    html += '<td>'+(MESES[parent.mes]||parent.mes)+'</td>';
+    html += '<td>'+tipoBadge(parent.tipo)+'</td>';
+    html += '<td>'+statusBadge(taskStatus)+'</td>';
+    html += '<td style="max-width:300px">';
+    if(hasSubs) html += '<span class="expand-icon">'+(expanded?'▼':'▶')+'</span> ';
+    html += (parent.motivo||'');
+    if(hasSubs) html += ' <span class="sub-count">'+rows.length+' andamentos</span>';
+    html += '</td>';
+    html += '<td>'+(parent.solicitante||'—')+'</td>';
+    html += '<td style="white-space:nowrap">'+(parent.data_final||'—')+'</td>';
+    html += '</tr>';
+
+    // Sub-rows (andamentos) — shown only when expanded
+    if(hasSubs && expanded) {
+      for(var i=1;i<rows.length;i++) {
+        var r = rows[i];
+        html += '<tr class="sub-row">';
+        html += '<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data||'')+'</td>';
+        html += '<td style="color:#888;font-size:.75rem">'+(MESES[r.mes]||r.mes)+'</td>';
+        html += '<td>'+tipoBadge(r.tipo)+'</td>';
+        html += '<td>'+statusBadge(r.status)+'</td>';
+        html += '<td style="max-width:300px"><span class="sub-level-badge">Andamento '+r.sub+'</span> '+(r.motivo||'')+'</td>';
+        html += '<td style="color:#888;font-size:.75rem">'+(r.solicitante||'—')+'</td>';
+        html += '<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data_final||'—')+'</td>';
+        html += '</tr>';
+      }
+    }
+  });
+
+  document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="7" class="empty">Nenhuma tarefa encontrada.</td></tr>';
 }
 
-function renderAll() { renderKPI(); renderCharts(); renderTable(); }
+function renderAll(){renderKPI();renderCharts();renderTable();}
 populateFilters();
 renderAll();
 
+</script>
+
+<script>
+// Mostrar botão Voltar apenas se veio da página principal
+(function(){
+  var ref = document.referrer;
+  if(ref && ref.indexOf('index.html') !== -1) {
+    var btn = document.getElementById('backBtn');
+    if(btn) btn.style.display = '';
+  }
+})();
 </script>
 </body>
 </html>

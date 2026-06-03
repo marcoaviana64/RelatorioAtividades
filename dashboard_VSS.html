@@ -51,7 +51,7 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 <body>
 <div class="header">
   <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-    <a class="back-btn" href="index.html">← Voltar</a>
+    <a class="back-btn" id="backBtn" href="index.html" style="display:none">← Voltar</a>
     <div>
       <h1>📋 Relatório de Atividades TI</h1>
       <p>Visibilidade por período · Status · Tipo de atividade</p>
@@ -221,5 +221,16 @@ renderAll();
 </script>
 
 <footer style="text-align:center;padding:20px 36px;font-size:.75rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px"><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Relatório de Controle de Atividades TI &nbsp;·&nbsp; Dados atualizados em <strong>02/06/2026</strong></footer>
+
+<script>
+// Mostrar botão Voltar apenas se veio da página principal
+(function(){
+  var ref = document.referrer;
+  if(ref && ref.indexOf('index.html') !== -1) {
+    var btn = document.getElementById('backBtn');
+    if(btn) btn.style.display = '';
+  }
+})();
+</script>
 </body>
 </html>
