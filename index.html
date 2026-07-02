@@ -1,82 +1,78 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TI — Central de Dashboards</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
 .header{background:linear-gradient(135deg,#0f3460 0%,#16213e 100%);color:white;padding:28px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;box-shadow:0 4px 24px rgba(0,0,0,.35)}
-.header h1{font-size:1.8rem;font-weight:800;letter-spacing:.4px}
-.header p{font-size:.85rem;opacity:.65;margin-top:5px}
+.header h1{font-size:1.8rem;font-weight:800}.header p{font-size:.85rem;opacity:.65;margin-top:5px}
 .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .nervia-badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:6px 16px;border-radius:20px;font-size:.82rem;font-weight:600}
-.update-badge{font-size:.7rem;opacity:.6}
-.search-bar{display:flex;justify-content:center;margin:28px 24px 6px}
-.search-bar input{width:100%;max-width:460px;padding:11px 20px;border:2px solid #dde;border-radius:30px;font-size:.9rem;outline:none;background:white;box-shadow:0 2px 10px rgba(0,0,0,.07);transition:border-color .2s}
+.info-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 44px;display:flex;gap:28px;flex-wrap:wrap;font-size:.74rem;color:#555}
+.info-bar span b{color:#222}
+.search-bar{display:flex;justify-content:center;margin:26px 24px 6px}
+.search-bar input{width:100%;max-width:460px;padding:11px 20px;border:2px solid #dde;border-radius:30px;font-size:.9rem;outline:none;background:white;box-shadow:0 2px 10px rgba(0,0,0,.07)}
 .search-bar input:focus{border-color:#0f3460}
 .stats{display:flex;justify-content:center;gap:30px;margin:16px 0 24px;flex-wrap:wrap}
-.stat{text-align:center}
-.stat .val{font-size:1.55rem;font-weight:800;color:#0f3460}
-.stat .lbl{font-size:.7rem;color:#999;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat{text-align:center}.stat .val{font-size:1.55rem;font-weight:800;color:#0f3460}.stat .lbl{font-size:.7rem;color:#999;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;padding:0 36px 44px;max-width:1280px;margin:0 auto}
 .card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,.09);transition:transform .18s,box-shadow .18s;cursor:pointer;text-decoration:none;display:flex;flex-direction:column}
-.card:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(0,0,0,.16)}
-.card:hover .card-footer{opacity:1}
+.card:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(0,0,0,.16)}.card:hover .card-footer{opacity:1}
 .card-top{padding:22px 20px 16px;display:flex;flex-direction:column;gap:7px;color:white;min-height:120px;position:relative;overflow:hidden}
-.card-top::after{content:'';position:absolute;right:-18px;bottom:-18px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.1)}
-.card-top::before{content:'';position:absolute;right:18px;bottom:-36px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.07)}
-.card-emp{font-size:1.5rem;font-weight:900;letter-spacing:1px;z-index:1}
-.card-name{font-size:.75rem;opacity:.78;z-index:1;font-weight:500}
+.card-emp{font-size:1.5rem;font-weight:900;letter-spacing:1px;z-index:1}.card-name{font-size:.75rem;opacity:.78;z-index:1;font-weight:500}
 .card-body{padding:14px 18px;display:flex;gap:14px}
-.mini-stat{flex:1;text-align:center}
-.mini-stat .mv{font-size:1.25rem;font-weight:800}
-.mini-stat .ml{font-size:.65rem;color:#aaa;font-weight:600;text-transform:uppercase}
-.mini-stat.green .mv{color:#10b981}
-.mini-stat.amber .mv{color:#f59e0b}
-.mini-stat.blue .mv{color:#0f3460}
+.mini-stat{flex:1;text-align:center}.mini-stat .mv{font-size:1.25rem;font-weight:800}.mini-stat .ml{font-size:.65rem;color:#aaa;font-weight:600;text-transform:uppercase}
+.mini-stat.green .mv{color:#10b981}.mini-stat.amber .mv{color:#f59e0b}.mini-stat.blue .mv{color:#0f3460}
 .divider{height:1px;background:#f0f0f0;margin:0 18px}
 .card-footer{padding:10px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.76rem;color:#888;opacity:0;transition:opacity .18s;background:#fafafa}
 .card-footer span{font-weight:700;color:#0f3460}
 .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.22);color:white;z-index:1;align-self:flex-start}
-.empty-msg{display:none;text-align:center;padding:60px;color:#bbb;font-size:.95rem;grid-column:1/-1}
-footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px solid #e0e0e0;margin-top:4px}
-@media(max-width:600px){.grid{padding:0 14px 36px;gap:12px}.header{padding:20px 16px}.header h1{font-size:1.35rem}}
+footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px solid #e0e0e0}
 </style>
 </head>
 <body>
 <div class="header">
-  <div>
-    <h1>🏢 Central de Dashboards TI</h1>
-    <p>Selecione o empreendimento para visualizar as atividades</p>
-  </div>
-  <div class="header-right">
-    <span class="nervia-badge">Nervia Tecnologia da Informação</span>
-    <span class="update-badge">Dados atualizados em 02/06/2026</span>
-  </div>
+  <div><h1>🏢 Central de Dashboards TI</h1><p>Selecione o empreendimento para visualizar as atividades</p></div>
+  <div class="header-right"><span class="nervia-badge">Nervia Tecnologia da Informação</span></div>
 </div>
-<div class="search-bar">
-  <input type="text" id="search" placeholder="🔍  Buscar empreendimento ou shopping..." oninput="filterCards()" />
+<div class="info-bar">
+  <span>📅 <b>Último registro no Excel:</b> 01/07/2026</span>
+  <span>📁 <b>Arquivo atualizado em:</b> 01/07/2026</span>
+  <span>🕐 <b>Formulários gerados em:</b> 01/07/2026 22:17</span>
 </div>
+<div class="search-bar"><input type="text" id="s" placeholder="🔍  Buscar empreendimento..." oninput="fc()"></div>
 <div class="stats">
-  <div class="stat"><div class="val">10</div><div class="lbl">Empreendimentos</div></div>
-  <div class="stat"><div class="val">105</div><div class="lbl">Tarefas Registradas</div></div>
-  <div class="stat"><div class="val">91</div><div class="lbl">Concluídas</div></div>
-  <div class="stat"><div class="val">14</div><div class="lbl">Em Aberto</div></div>
+  <div class="stat"><div class="val">12</div><div class="lbl">Empreendimentos</div></div>
+  <div class="stat"><div class="val">165</div><div class="lbl">Tarefas Registradas</div></div>
+  <div class="stat"><div class="val">136</div><div class="lbl">Concluídas</div></div>
+  <div class="stat"><div class="val">29</div><div class="lbl">Em Aberto</div></div>
 </div>
-<div class="grid" id="grid">
-
+<div class="grid" id="g">
   <a class="card" href="dashboard_ARGO.html">
     <div class="card-top" style="background:linear-gradient(135deg,#1a3a5c,#0a1f35)">
       <div class="card-emp">ARGO</div>
-      <div class="card-name">Argoplan</div>
-      <span class="pill">3 tarefas</span>
+      <div class="card-name">ARGO</div>
+      <span class="pill">5 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">2</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">1</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">67%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">5</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">0</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">100%</div><div class="ml">Resolução</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-footer"><span>Abrir Dashboard →</span></div>
+  </a>
+  <a class="card" href="dashboard_Ecipar.html">
+    <div class="card-top" style="background:linear-gradient(135deg,#37474f,#1c313a)">
+      <div class="card-emp">Ecipar</div>
+      <div class="card-name">Ecipar</div>
+      <span class="pill">1 tarefa</span>
+    </div>
+    <div class="card-body">
+      <div class="mini-stat green"><div class="mv">1</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">0</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">100%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
@@ -84,11 +80,11 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_IGU.html">
     <div class="card-top" style="background:linear-gradient(135deg,#155724,#0a3316)">
       <div class="card-emp">IGU</div>
-      <div class="card-name">iGuardei</div>
-      <span class="pill">6 tarefas</span>
+      <div class="card-name">IGU</div>
+      <span class="pill">10 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">6</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat green"><div class="mv">10</div><div class="ml">Fechadas</div></div>
       <div class="mini-stat amber"><div class="mv">0</div><div class="ml">Abertas</div></div>
       <div class="mini-stat blue"><div class="mv">100%</div><div class="ml">Resolução</div></div>
     </div>
@@ -98,13 +94,13 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_IMC.html">
     <div class="card-top" style="background:linear-gradient(135deg,#6a0572,#3d0042)">
       <div class="card-emp">IMC</div>
-      <div class="card-name">Multicenter Itaipu</div>
-      <span class="pill">8 tarefas</span>
+      <div class="card-name">IMC</div>
+      <span class="pill">12 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">8</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">0</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">100%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">11</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">1</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">92%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
@@ -112,13 +108,13 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_Rio2Pom.html">
     <div class="card-top" style="background:linear-gradient(135deg,#7b3f00,#4a2500)">
       <div class="card-emp">Rio2Pom</div>
-      <div class="card-name">Rio2 Peninsula</div>
-      <span class="pill">7 tarefas</span>
+      <div class="card-name">Rio2Pom</div>
+      <span class="pill">13 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">4</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">3</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">57%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">7</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">6</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">54%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
@@ -126,7 +122,7 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_SCP.html">
     <div class="card-top" style="background:linear-gradient(135deg,#0d47a1,#07305c)">
       <div class="card-emp">SCP</div>
-      <div class="card-name">Shopping Compinas</div>
+      <div class="card-name">SCP</div>
       <span class="pill">1 tarefa</span>
     </div>
     <div class="card-body">
@@ -140,7 +136,35 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_SHD.html">
     <div class="card-top" style="background:linear-gradient(135deg,#4a148c,#2d0b57)">
       <div class="card-emp">SHD</div>
-      <div class="card-name">Shopping D</div>
+      <div class="card-name">SHD</div>
+      <span class="pill">1 tarefa</span>
+    </div>
+    <div class="card-body">
+      <div class="mini-stat green"><div class="mv">0</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">1</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">0%</div><div class="ml">Resolução</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-footer"><span>Abrir Dashboard →</span></div>
+  </a>
+  <a class="card" href="dashboard_SIP.html">
+    <div class="card-top" style="background:linear-gradient(135deg,#006064,#003b3e)">
+      <div class="card-emp">SIP</div>
+      <div class="card-name">SIP</div>
+      <span class="pill">23 tarefas</span>
+    </div>
+    <div class="card-body">
+      <div class="mini-stat green"><div class="mv">19</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">4</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">83%</div><div class="ml">Resolução</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-footer"><span>Abrir Dashboard →</span></div>
+  </a>
+  <a class="card" href="dashboard_SPL.html">
+    <div class="card-top" style="background:linear-gradient(135deg,#37474f,#1c313a)">
+      <div class="card-emp">SPL</div>
+      <div class="card-name">SPL</div>
       <span class="pill">2 tarefas</span>
     </div>
     <div class="card-body">
@@ -151,30 +175,16 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
   </a>
-  <a class="card" href="dashboard_SIP.html">
-    <div class="card-top" style="background:linear-gradient(135deg,#006064,#003b3e)">
-      <div class="card-emp">SIP</div>
-      <div class="card-name">Itaborai Plaza</div>
-      <span class="pill">14 tarefas</span>
-    </div>
-    <div class="card-body">
-      <div class="mini-stat green"><div class="mv">12</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">2</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">86%</div><div class="ml">Resolução</div></div>
-    </div>
-    <div class="divider"></div>
-    <div class="card-footer"><span>Abrir Dashboard →</span></div>
-  </a>
   <a class="card" href="dashboard_SPS.html">
     <div class="card-top" style="background:linear-gradient(135deg,#bf360c,#7d2208)">
       <div class="card-emp">SPS</div>
-      <div class="card-name">Shopping Park Sul</div>
-      <span class="pill">41 tarefas</span>
+      <div class="card-name">SPS</div>
+      <span class="pill">67 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">37</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">4</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">90%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">59</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">8</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">88%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
@@ -182,13 +192,13 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_STQ.html">
     <div class="card-top" style="background:linear-gradient(135deg,#1b5e20,#0a3810)">
       <div class="card-emp">STQ</div>
-      <div class="card-name">Taquara Plaza Shopping</div>
-      <span class="pill">1 tarefa</span>
+      <div class="card-name">STQ</div>
+      <span class="pill">5 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">1</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">0</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">100%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">4</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">1</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">80%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
@@ -196,36 +206,18 @@ footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px
   <a class="card" href="dashboard_SVS.html">
     <div class="card-top" style="background:linear-gradient(135deg,#1a237e,#0d1259)">
       <div class="card-emp">SVS</div>
-      <div class="card-name">Shopping Vogue Square</div>
-      <span class="pill">22 tarefas</span>
+      <div class="card-name">SVS</div>
+      <span class="pill">25 tarefas</span>
     </div>
     <div class="card-body">
-      <div class="mini-stat green"><div class="mv">20</div><div class="ml">Fechadas</div></div>
-      <div class="mini-stat amber"><div class="mv">2</div><div class="ml">Abertas</div></div>
-      <div class="mini-stat blue"><div class="mv">91%</div><div class="ml">Resolução</div></div>
+      <div class="mini-stat green"><div class="mv">19</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">6</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">76%</div><div class="ml">Resolução</div></div>
     </div>
     <div class="divider"></div>
     <div class="card-footer"><span>Abrir Dashboard →</span></div>
-  </a>
-  <div class="empty-msg" id="emptyMsg">Nenhum empreendimento encontrado.</div>
-</div>
-<footer>
-  <strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp;
-  Relatório de Controle de Atividades TI &nbsp;·&nbsp;
-  Dados atualizados em <strong>02/06/2026</strong>
-</footer>
-<script>
-function filterCards() {
-  var q = document.getElementById('search').value.toLowerCase();
-  var cards = document.querySelectorAll('.card');
-  var found = 0;
-  cards.forEach(function(c) {
-    var show = c.innerText.toLowerCase().includes(q);
-    c.style.display = show ? '' : 'none';
-    if (show) found++;
-  });
-  document.getElementById('emptyMsg').style.display = found === 0 ? 'block' : 'none';
-}
-</script>
+  </a></div>
+<footer><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Último registro: <strong>01/07/2026</strong> &nbsp;·&nbsp; Gerado em: <strong>01/07/2026 22:17</strong></footer>
+<script>function fc(){var q=document.getElementById('s').value.toLowerCase();document.querySelectorAll('#g .card').forEach(c=>{c.style.display=!q||c.innerText.toLowerCase().includes(q)?'':'none';});}</script>
 </body>
 </html>

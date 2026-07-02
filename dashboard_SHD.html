@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TI — Shopping D</title>
+<title>TI — SHD</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -16,8 +16,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .header .sub{font-size:.78rem;opacity:.65;margin-top:3px}
 .header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .emp-tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);padding:5px 16px;border-radius:20px;font-size:.95rem;font-weight:900;letter-spacing:1px}
-.emp-name{font-size:.75rem;opacity:.7;text-align:right}
-.nervia{font-size:.68rem;opacity:.55}
+.emp-name{font-size:.75rem;opacity:.7}.nervia{font-size:.68rem;opacity:.55}
+.info-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.73rem;color:#555}
+.info-bar span b{color:#222}
 .filters{background:white;padding:12px 32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .filter-label{font-size:.76rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
 .filters select{border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:.82rem;color:#333;background:#fafafa;cursor:pointer;outline:none}
@@ -43,38 +44,33 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .detail-table tbody tr:hover td{background:#eef3ff}
 .detail-table td{padding:7px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top}
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700}
-.badge-fechado{background:#d4edda;color:#155724}
-.badge-aberto{background:#fff3cd;color:#856404}
-.badge-suporte{background:#cce5ff;color:#004085}
-.badge-consultoria{background:#e2d9f3;color:#3d1a78}
-.badge-software{background:#d1ecf1;color:#0c5460}
-.empty{text-align:center;padding:30px;color:#aaa}
+.badge-fechado{background:#d4edda;color:#155724}.badge-aberto{background:#fff3cd;color:#856404}.badge-andamento{background:#bbdefb;color:#1565c0}
+.badge-suporte{background:#cce5ff;color:#004085}.badge-consultoria{background:#e2d9f3;color:#3d1a78}.badge-software{background:#d1ecf1;color:#0c5460}
 footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px}
-
-.task-row.has-subs:hover td { background: #f0f4ff; }
-.sub-row td { background: #f8f9ff; border-left: 3px solid #4a148c; }
-.sub-row:last-child td { border-bottom: 2px solid #e8ecff; }
-.expand-icon { font-size: .7rem; color: #4a148c; margin-right: 2px; }
-.sub-count { display:inline-block; background: #e8ecff; color: #4a148c; border-radius:10px; padding:1px 7px; font-size:.66rem; font-weight:700; margin-left:4px; }
-.sub-level-badge { display:inline-block; background:#f0f0f0; color:#666; border-radius:10px; padding:1px 7px; font-size:.65rem; font-weight:700; margin-right:4px; }
-
-@media(max-width:800px){.charts-row{grid-template-columns:1fr}.main{padding:14px 14px}}
+.task-row.has-subs{cursor:pointer}.task-row.has-subs:hover td{background:#f0f4ff}
+.sub-row td{background:#f8f9ff;border-left:3px solid #4a148c}
+.expand-icon{font-size:.7rem;color:#4a148c;margin-right:2px}
+.sub-count{display:inline-block;background:#e8ecff;color:#4a148c;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;margin-left:4px}
+.sub-level-badge{display:inline-block;background:#f0f0f0;color:#666;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700;margin-right:4px}
+@media(max-width:800px){.charts-row{grid-template-columns:1fr}.main{padding:14px}}
 </style>
 </head>
 <body>
 <div class="header">
   <div class="header-left">
-    <a class="back-btn" id="backBtn" href="index.html" style="display:none">← Voltar</a>
-    <div>
-      <h1>📋 Relatório de Atividades TI</h1>
-      <div class="sub">Shopping D &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div>
-    </div>
+    <a class="back-btn" href="index.html">← Voltar</a>
+    <div><h1>📋 Relatório de Atividades TI</h1><div class="sub">SHD &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div></div>
   </div>
   <div class="header-right">
     <div class="emp-tag">SHD</div>
-    <div class="emp-name">Shopping D</div>
+    <div class="emp-name">SHD</div>
     <div class="nervia">Nervia Tecnologia da Informação</div>
   </div>
+</div>
+<div class="info-bar">
+  <span>📅 <b>Último registro no Excel:</b> 01/07/2026</span>
+  <span>📁 <b>Arquivo atualizado em:</b> 01/07/2026</span>
+  <span>🕐 <b>Formulário gerado em:</b> 01/07/2026 22:17</span>
 </div>
 <div class="filters">
   <span class="filter-label">Filtro</span>
@@ -96,12 +92,9 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
     <div class="table-wrap">
       <table class="detail-table">
         <thead><tr>
-          <th onclick="sortTable('data')">Data ↕</th>
-          <th onclick="sortTable('mes')">Mês ↕</th>
-          <th onclick="sortTable('tipo')">Tipo ↕</th>
-          <th onclick="sortTable('status')">Status ↕</th>
-          <th>Motivo / Tarefa</th>
-          <th onclick="sortTable('solicitante')">Solicitante ↕</th>
+          <th onclick="sortTable('data')">Data ↕</th><th onclick="sortTable('mes')">Mês ↕</th>
+          <th onclick="sortTable('tipo')">Tipo ↕</th><th onclick="sortTable('status')">Status ↕</th>
+          <th>Motivo / Tarefa &nbsp;·&nbsp; <span style="opacity:.7;font-weight:500">💡 Solução</span></th><th onclick="sortTable('solicitante')">Solicitante ↕</th>
           <th onclick="sortTable('data_final')">Conclusão ↕</th>
         </tr></thead>
         <tbody id="tableBody"></tbody>
@@ -109,209 +102,33 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
     </div>
   </div>
 </div>
-<footer>
-  <strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp;
-  Relatório de Controle de Atividades TI &nbsp;·&nbsp;
-  Dados atualizados em <strong>02/06/2026</strong>
-</footer>
+<footer><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Relatório de Controle de Atividades TI &nbsp;·&nbsp; Último registro: <strong>01/07/2026</strong> &nbsp;·&nbsp; Gerado em: <strong>01/07/2026 22:17</strong></footer>
 <script>
-
-const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const RAW = [{"sub": 1, "data": "2026-05-06", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "SHD", "shopping": "Shopping D", "atividade": "Consultoria/Gerencia Ambiente nuvem Sistema VS", "tipo": "Software", "status": "Aberto", "motivo": "Acompanhamento movimentação contratos SYN -> Shopping D", "solicitante": "Leandro", "data_final": null, "task_id": 23}, {"sub": 2, "data": "2026-05-06", "ano": 2026, "mes": 5, "ano_mes": "2026/05", "empreendimento": "SHD", "shopping": "Shopping D", "atividade": "Consultoria/Gerencia Ambiente nuvem Sistema VS", "tipo": "Software", "status": "Fechado", "motivo": "Contrato SOVOS: Pedido para não renovar foi solicitado vence 31/05/2026", "solicitante": "Daniela SHD", "data_final": "2026-05-06", "task_id": 23}];
-const COLOR = '#4a148c';
-let filtered = [...RAW], sortCol = 'data', sortAsc = true;
-let charts = {};
-let expandedTasks = {};
-
-function populateFilters() {
-  const meses = [...new Set(RAW.map(r=>r.mes))].sort((a,b)=>a-b);
-  const statuses = [...new Set(RAW.map(r=>r.status))].sort();
-  const tipos = [...new Set(RAW.map(r=>r.tipo).filter(Boolean))].sort();
-  function sel(id, vals, fmt) {
-    const el = document.getElementById(id);
-    vals.forEach(v => { const o = document.createElement('option'); o.value=v; o.textContent=fmt?fmt(v):v; el.appendChild(o); });
-  }
-  sel('filterMes', meses, m => MESES[m]||m);
-  sel('filterStatus', statuses);
-  sel('filterTipo', tipos);
-  ['filterMes','filterStatus','filterTipo'].forEach(id => document.getElementById(id).addEventListener('change', applyFilters));
+const MESES=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const RAW=[{"sub":1,"data":"2026-05-06","ano":2026,"mes":5,"ano_mes":"2026/05","empreendimento":"SHD","shopping":"SHD","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Software","status":"Aberto","motivo":"Acompanhamento movimentação contratos SYN -> Shopping D","solucao":"Cancelar/Mudar para CNPJ Shopping os contratos guarda chuva SYN","solicitante":"Leandro","data_final":null,"task_id":22},{"sub":2,"data":"2026-05-06","ano":2026,"mes":5,"ano_mes":"2026/05","empreendimento":"SHD","shopping":"SHD","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Software","status":"Fechado","motivo":"Contrato SOVOS: Pedido para não renovar foi solicitado vence 31/05/2026","solucao":"SYN já informou para remover o shopping do contrato deles","solicitante":"Daniela SHD","data_final":"2026-05-06","task_id":22}];
+const COLOR='#4a148c';
+let filtered=[...RAW],sortCol='data',sortAsc=true,charts={},expanded={};
+function populateFilters(){
+  const meses=[...new Set(RAW.map(r=>r.mes))].sort((a,b)=>a-b);
+  const statuses=[...new Set(RAW.map(r=>r.status))].sort();
+  const tipos=[...new Set(RAW.map(r=>r.tipo).filter(Boolean))].sort();
+  function sel(id,vals,fmt){const el=document.getElementById(id);vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});}
+  sel('filterMes',meses,m=>MESES[m]||m);sel('filterStatus',statuses);sel('filterTipo',tipos);
+  ['filterMes','filterStatus','filterTipo'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
 }
-
-function applyFilters() {
-  var mes = document.getElementById('filterMes').value;
-  var status = document.getElementById('filterStatus').value;
-  var tipo = document.getElementById('filterTipo').value;
-  // include parent rows (sub=1) if any sub-row matches, plus the sub-rows themselves
-  var matchIds = new Set();
-  RAW.forEach(function(r) {
-    if ((!mes||r.mes==mes)&&(!status||r.status===status)&&(!tipo||r.tipo===tipo)) matchIds.add(r.task_id);
-  });
-  filtered = RAW.filter(r => matchIds.has(r.task_id));
-  renderAll();
-}
-
-function resetFilters() {
-  ['filterMes','filterStatus','filterTipo'].forEach(id => document.getElementById(id).value='');
-  filtered=[...RAW]; renderAll();
-}
-
-function renderKPI() {
-  // Count only sub=1 rows (unique tasks) for total
-  var tasks = filtered.filter(r=>r.sub===1);
-  var total = tasks.length;
-  // A task is "Fechado" if ALL its sub-rows are Fechado
-  var taskIds = [...new Set(tasks.map(r=>r.task_id))];
-  var fechado = taskIds.filter(function(tid) {
-    var subs = filtered.filter(r=>r.task_id===tid);
-    return subs.every(r=>r.status==='Fechado');
-  }).length;
-  var aberto = total - fechado;
-  var taxa = total ? Math.round(fechado/total*100) : 0;
-  var meses = new Set(filtered.map(r=>r.mes)).size;
-  var kpis = [
-    {value:total,    label:'Tarefas (chamados)', sub:meses+' mes(es)',    accent:COLOR},
-    {value:fechado,  label:'Concluídas',          sub:taxa+'% do total',  accent:'#10b981'},
-    {value:aberto,   label:'Em Aberto',            sub:'pendentes',        accent:'#f59e0b'},
-    {value:taxa+'%', label:'Taxa Resolução',       sub:'fechado / total',  accent:'#6366f1'},
-  ];
-  document.getElementById('kpiRow').innerHTML = kpis.map(k=>
-    '<div class="kpi-card" style="--accent:'+k.accent+'"><div class="kpi-value">'+k.value+
-    '</div><div class="kpi-label">'+k.label+'</div><div class="kpi-sub">'+k.sub+'</div></div>'
-  ).join('');
-  document.getElementById('countBadge').textContent = total + ' chamados · ' + filtered.length + ' andamentos';
-}
-
-function destroyChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
-
-function renderCharts() {
-  function monthKey(r){return r.ano+'-'+String(r.mes).padStart(2,'0');}
-  function monthLabel(m){var p=m.split('-');return MESES[parseInt(p[1])]+'/'+p[0].slice(2);}
-  // Only count sub=1 per month for unique tasks
-  var monthKeys=[...new Set(filtered.map(monthKey))].sort();
-
-  destroyChart('chartMes');
-  charts['chartMes']=new Chart(document.getElementById('chartMes'),{
-    type:'bar',
-    data:{labels:monthKeys.map(monthLabel),datasets:[
-      {label:'Chamados',data:monthKeys.map(m=>filtered.filter(r=>monthKey(r)===m&&r.sub===1).length),backgroundColor:COLOR+'cc',borderRadius:6},
-      {label:'Fechados',data:monthKeys.map(m=>{
-        var ids=[...new Set(filtered.filter(r=>monthKey(r)===m&&r.sub===1).map(r=>r.task_id))];
-        return ids.filter(tid=>filtered.filter(r=>r.task_id===tid).every(r=>r.status==='Fechado')).length;
-      }),backgroundColor:'#10b981cc',borderRadius:6}
-    ]},
-    options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
-  });
-
-  destroyChart('chartStatus');
-  var tipos=[...new Set(filtered.map(r=>r.tipo).filter(Boolean))];
-  charts['chartStatus']=new Chart(document.getElementById('chartStatus'),{
-    type:'bar',
-    data:{labels:tipos,datasets:[
-      {label:'Fechado',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Fechado').length),backgroundColor:'#10b981',borderRadius:5},
-      {label:'Aberto', data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Aberto').length), backgroundColor:'#f59e0b',borderRadius:5}
-    ]},
-    options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
-  });
-}
-
-function toggleTask(tid) {
-  expandedTasks[tid] = !expandedTasks[tid];
-  renderTable();
-}
-
-function sortTable(col) {
-  if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}
-  renderTable();
-}
-
-function renderTable() {
-  // Group filtered rows by task_id, maintaining order of first appearance
-  var taskOrder = [];
-  var taskMap = {};
-  filtered.forEach(function(r) {
-    if (!taskMap[r.task_id]) { taskMap[r.task_id]=[]; taskOrder.push(r.task_id); }
-    taskMap[r.task_id].push(r);
-  });
-
-  // Sort task order by the sort column of the parent (sub=1) row
-  taskOrder.sort(function(a,b) {
-    var ra = taskMap[a][0], rb = taskMap[b][0];
-    var va = ra[sortCol]!=null?ra[sortCol]:'';
-    var vb = rb[sortCol]!=null?rb[sortCol]:'';
-    if(typeof va==='number')return sortAsc?va-vb:vb-va;
-    return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
-  });
-
-  function tipoBadge(t){
-    if(!t)return'';
-    var cls=t==='Suporte TI'?'badge-suporte':t==='Consultoria TI'?'badge-consultoria':'badge-software';
-    return'<span class="badge '+cls+'">'+t+'</span>';
-  }
-  function statusBadge(s){
-    return'<span class="badge '+(s==='Fechado'?'badge-fechado':'badge-aberto')+'">'+s+'</span>';
-  }
-
-  var html = '';
-  taskOrder.forEach(function(tid) {
-    var rows = taskMap[tid];
-    var parent = rows[0];
-    var hasSubs = rows.length > 1;
-    var expanded = expandedTasks[tid];
-    var allFechado = rows.every(r=>r.status==='Fechado');
-
-    // Determine overall task status
-    var taskStatus = allFechado ? 'Fechado' : 'Aberto';
-
-    // Parent row
-    html += '<tr class="task-row'+(hasSubs?' has-subs':'')+'" onclick="'+(hasSubs?'toggleTask('+tid+')':'')+'" style="'+(hasSubs?'cursor:pointer':'')+'">';
-    html += '<td style="white-space:nowrap">'+(parent.data||'')+'</td>';
-    html += '<td>'+(MESES[parent.mes]||parent.mes)+'</td>';
-    html += '<td>'+tipoBadge(parent.tipo)+'</td>';
-    html += '<td>'+statusBadge(taskStatus)+'</td>';
-    html += '<td style="max-width:300px">';
-    if(hasSubs) html += '<span class="expand-icon">'+(expanded?'▼':'▶')+'</span> ';
-    html += (parent.motivo||'');
-    if(hasSubs) html += ' <span class="sub-count">'+rows.length+' andamentos</span>';
-    html += '</td>';
-    html += '<td>'+(parent.solicitante||'—')+'</td>';
-    html += '<td style="white-space:nowrap">'+(parent.data_final||'—')+'</td>';
-    html += '</tr>';
-
-    // Sub-rows (andamentos) — shown only when expanded
-    if(hasSubs && expanded) {
-      for(var i=1;i<rows.length;i++) {
-        var r = rows[i];
-        html += '<tr class="sub-row">';
-        html += '<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data||'')+'</td>';
-        html += '<td style="color:#888;font-size:.75rem">'+(MESES[r.mes]||r.mes)+'</td>';
-        html += '<td>'+tipoBadge(r.tipo)+'</td>';
-        html += '<td>'+statusBadge(r.status)+'</td>';
-        html += '<td style="max-width:300px"><span class="sub-level-badge">Andamento '+r.sub+'</span> '+(r.motivo||'')+'</td>';
-        html += '<td style="color:#888;font-size:.75rem">'+(r.solicitante||'—')+'</td>';
-        html += '<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data_final||'—')+'</td>';
-        html += '</tr>';
-      }
-    }
-  });
-
-  document.getElementById('tableBody').innerHTML = html || '<tr><td colspan="7" class="empty">Nenhuma tarefa encontrada.</td></tr>';
-}
-
+function applyFilters(){var mes=document.getElementById('filterMes').value,status=document.getElementById('filterStatus').value,tipo=document.getElementById('filterTipo').value,ids=new Set();RAW.forEach(r=>{if((!mes||r.mes==mes)&&(!status||r.status===status)&&(!tipo||r.tipo===tipo))ids.add(r.task_id);});filtered=RAW.filter(r=>ids.has(r.task_id));renderAll();}
+function resetFilters(){['filterMes','filterStatus','filterTipo'].forEach(id=>document.getElementById(id).value='');filtered=[...RAW];renderAll();}
+function taskStats(rows){var byId={};rows.forEach(r=>{if(!byId[r.task_id])byId[r.task_id]=[];byId[r.task_id].push(r);});var ids=Object.keys(byId);var f=ids.filter(id=>byId[id].every(r=>r.status==='Fechado')).length;return{total:ids.length,fechados:f,abertos:ids.length-f,byId,ids};}
+function renderKPI(){var st=taskStats(filtered);var taxa=st.total?Math.round(st.fechados/st.total*100):0;var nm=new Set(filtered.filter(r=>r.mes).map(r=>r.mes)).size;var kpis=[{v:st.total,l:'Tarefas (chamados)',s:nm+' mes(es)',a:COLOR},{v:st.fechados,l:'Concluídas',s:taxa+'% do total',a:'#10b981'},{v:st.abertos,l:'Em Aberto',s:'pendentes',a:'#f59e0b'},{v:taxa+'%',l:'Taxa Resolução',s:'fechado / total',a:'#6366f1'}];document.getElementById('kpiRow').innerHTML=kpis.map(k=>'<div class="kpi-card" style="--accent:'+k.a+'"><div class="kpi-value">'+k.v+'</div><div class="kpi-label">'+k.l+'</div><div class="kpi-sub">'+k.s+'</div></div>').join('');document.getElementById('countBadge').textContent=filtered.filter(r=>r.sub===1).length+' chamados · '+filtered.length+' andamentos';}
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function renderCharts(){var mk=r=>r.ano+'-'+String(r.mes).padStart(2,'0');var ml=m=>{var p=m.split('-');return MESES[parseInt(p[1])]+'/'+p[0].slice(2);};var st=taskStats(filtered);var mks=[...new Set(filtered.filter(r=>r.mes&&r.ano).map(mk))].sort();dc('chartMes');charts['chartMes']=new Chart(document.getElementById('chartMes'),{type:'bar',data:{labels:mks.map(ml),datasets:[{label:'Chamados',data:mks.map(m=>filtered.filter(r=>r.sub===1&&mk(r)===m).length),backgroundColor:COLOR+'cc',borderRadius:6},{label:'Fechados',data:mks.map(m=>{var ids=[...new Set(filtered.filter(r=>r.sub===1&&mk(r)===m).map(r=>r.task_id))];return ids.filter(id=>st.byId[id]&&st.byId[id].every(r=>r.status==='Fechado')).length;}),backgroundColor:'#10b981cc',borderRadius:6}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}});dc('chartStatus');var tipos=[...new Set(filtered.map(r=>r.tipo).filter(Boolean))];charts['chartStatus']=new Chart(document.getElementById('chartStatus'),{type:'bar',data:{labels:tipos,datasets:[{label:'Fechado',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Fechado').length),backgroundColor:'#10b981',borderRadius:5},{label:'Aberto',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Aberto').length),backgroundColor:'#f59e0b',borderRadius:5}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}});}
+function toggleTask(tid){expanded[tid]=!expanded[tid];renderTable();}
+function sortTable(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}renderTable();}
+function tipoBadge(t){if(!t)return'';var cls=t==='Suporte TI'?'badge-suporte':t==='Consultoria TI'?'badge-consultoria':'badge-software';return'<span class="badge '+cls+'">'+t+'</span>';}
+function statusBadge(s){var cls=s==='Fechado'?'badge-fechado':(s||'').toLowerCase().includes('andamento')?'badge-andamento':'badge-aberto';return'<span class="badge '+cls+'">'+(s||'—')+'</span>';}
+function renderTable(){var st=taskStats(filtered);var ids=[...st.ids];ids.sort((a,b)=>{var ra=st.byId[a][0],rb=st.byId[b][0];var va=ra[sortCol]!=null?ra[sortCol]:'',vb=rb[sortCol]!=null?rb[sortCol]:'';if(typeof va==='number')return sortAsc?va-vb:vb-va;return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));});var html='';ids.forEach(tid=>{var rows=st.byId[tid];var p=rows[0];var hs=rows.length>1;var exp=expanded[tid];var allF=rows.every(r=>r.status==='Fechado');html+='<tr class="task-row'+(hs?' has-subs':'')+'"'+(hs?' onclick="toggleTask('+tid+')"':'')+' >';var bestSol=rows.map(function(r){return r.solucao;}).find(function(s){return s;});var solTag=function(s){return s?'<br><span style="font-size:.72rem;color:#155724;background:#d4edda;padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block">💡 '+String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>':'';};var tSt=allF?'Fechado':(rows.find(r=>r.status!=='Fechado')||rows[0]).status||'Aberto';html+='<td style="white-space:nowrap">'+(p.data||'')+'</td><td>'+(MESES[p.mes]||p.mes||'')+'</td><td>'+tipoBadge(p.tipo)+'</td><td>'+statusBadge(tSt)+'</td><td style="max-width:320px">'+(hs?'<span class="expand-icon">'+(exp?'▼':'▶')+'</span> ':'')+String(p.motivo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+(hs?' <span class="sub-count">'+rows.length+' andamentos</span>':'')+(allF?solTag(bestSol):'')+'</td><td>'+(p.solicitante||'—')+'</td><td style="white-space:nowrap">'+(p.data_final||'—')+'</td></tr>';if(hs&&exp){for(var i=1;i<rows.length;i++){var r=rows[i];html+='<tr class="sub-row"><td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data||'')+'</td><td style="color:#888;font-size:.75rem">'+(MESES[r.mes]||r.mes||'')+'</td><td>'+tipoBadge(r.tipo)+'</td><td>'+statusBadge(r.status)+'</td><td style="max-width:320px"><span class="sub-level-badge">Andamento '+r.sub+'</span>'+String(r.motivo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+(r.status==='Fechado'?solTag(r.solucao):'')+'</td><td style="color:#888;font-size:.75rem">'+(r.solicitante||'—')+'</td><td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data_final||'—')+'</td></tr>';}}});document.getElementById('tableBody').innerHTML=html||'<tr><td colspan="7" style="text-align:center;padding:30px;color:#aaa">Nenhuma tarefa encontrada.</td></tr>';}
 function renderAll(){renderKPI();renderCharts();renderTable();}
-populateFilters();
-renderAll();
-
-</script>
-
-<script>
-// Mostrar botão Voltar apenas se veio da página principal
-(function(){
-  var ref = document.referrer;
-  if(ref && ref.indexOf('index.html') !== -1) {
-    var btn = document.getElementById('backBtn');
-    if(btn) btn.style.display = '';
-  }
-})();
+populateFilters();renderAll();
 </script>
 </body>
 </html>

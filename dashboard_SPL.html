@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TI — ARGO</title>
+<title>TI — SPL</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
-.header{background:linear-gradient(135deg,#1a3a5c 0%,#0a1f35 100%);color:white;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.3);flex-wrap:wrap;gap:12px}
+.header{background:linear-gradient(135deg,#37474f 0%,#1c313a 100%);color:white;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.3);flex-wrap:wrap;gap:12px}
 .header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:7px 14px;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s}
 .back-btn:hover{background:rgba(255,255,255,.25)}
@@ -22,8 +22,8 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .filters{background:white;padding:12px 32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .filter-label{font-size:.76rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
 .filters select{border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:.82rem;color:#333;background:#fafafa;cursor:pointer;outline:none}
-.filters select:focus{border-color:#1a3a5c}
-.btn-reset{background:#1a3a5c;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;cursor:pointer}
+.filters select:focus{border-color:#37474f}
+.btn-reset{background:#37474f;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;cursor:pointer}
 .main{padding:22px 32px;max-width:1300px;margin:0 auto}
 .kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
 .kpi-card{background:white;border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--accent)}
@@ -34,11 +34,11 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
 .card h3{font-size:.78rem;font-weight:700;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0f2f5;padding-bottom:8px}
 .chart-wrap{position:relative;height:220px}
-.section-title{font-size:.9rem;font-weight:800;color:#1a3a5c;margin:4px 0 12px;display:flex;align-items:center;gap:8px}
-.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,#1a3a5c 0%,transparent 100%);border-radius:2px}
+.section-title{font-size:.9rem;font-weight:800;color:#37474f;margin:4px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,#37474f 0%,transparent 100%);border-radius:2px}
 .table-wrap{max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid #e8e8e8}
 .detail-table{width:100%;border-collapse:collapse;font-size:.78rem}
-.detail-table thead th{background:#1a3a5c;color:white;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer}
+.detail-table thead th{background:#37474f;color:white;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer}
 .detail-table thead th:hover{opacity:.88}
 .detail-table tbody tr:nth-child(even){background:#fafafa}
 .detail-table tbody tr:hover td{background:#eef3ff}
@@ -48,9 +48,9 @@ body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
 .badge-suporte{background:#cce5ff;color:#004085}.badge-consultoria{background:#e2d9f3;color:#3d1a78}.badge-software{background:#d1ecf1;color:#0c5460}
 footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px}
 .task-row.has-subs{cursor:pointer}.task-row.has-subs:hover td{background:#f0f4ff}
-.sub-row td{background:#f8f9ff;border-left:3px solid #1a3a5c}
-.expand-icon{font-size:.7rem;color:#1a3a5c;margin-right:2px}
-.sub-count{display:inline-block;background:#e8ecff;color:#1a3a5c;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;margin-left:4px}
+.sub-row td{background:#f8f9ff;border-left:3px solid #37474f}
+.expand-icon{font-size:.7rem;color:#37474f;margin-right:2px}
+.sub-count{display:inline-block;background:#e8ecff;color:#37474f;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;margin-left:4px}
 .sub-level-badge{display:inline-block;background:#f0f0f0;color:#666;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700;margin-right:4px}
 @media(max-width:800px){.charts-row{grid-template-columns:1fr}.main{padding:14px}}
 </style>
@@ -59,11 +59,11 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
 <div class="header">
   <div class="header-left">
     <a class="back-btn" href="index.html">← Voltar</a>
-    <div><h1>📋 Relatório de Atividades TI</h1><div class="sub">ARGO &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div></div>
+    <div><h1>📋 Relatório de Atividades TI</h1><div class="sub">SPL &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div></div>
   </div>
   <div class="header-right">
-    <div class="emp-tag">ARGO</div>
-    <div class="emp-name">ARGO</div>
+    <div class="emp-tag">SPL</div>
+    <div class="emp-name">SPL</div>
     <div class="nervia">Nervia Tecnologia da Informação</div>
   </div>
 </div>
@@ -105,8 +105,8 @@ footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-to
 <footer><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Relatório de Controle de Atividades TI &nbsp;·&nbsp; Último registro: <strong>01/07/2026</strong> &nbsp;·&nbsp; Gerado em: <strong>01/07/2026 22:17</strong></footer>
 <script>
 const MESES=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const RAW=[{"sub":1,"data":"2026-04-22","ano":2026,"mes":4,"ano_mes":"2026/04","empreendimento":"ARGO","shopping":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Consultoria TI","status":"Fechado","motivo":"Analise de todos os registros.br em nome de MV e passar para TI","solucao":"Registros alterados para tiarg3","solicitante":"Marco","data_final":"2026-06-16","task_id":14},{"sub":1,"data":"2026-05-06","ano":2026,"mes":5,"ano_mes":"2026/05","empreendimento":"ARGO","shopping":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Suporte TI","status":"Fechado","motivo":"Cadu precisa saber onde estão os backup do ambiente nuvem Argo","solucao":"Informado login e senha da conta do google drive","solicitante":"Cadu JLL","data_final":"2026-05-06","task_id":21},{"sub":1,"data":"2026-05-11","ano":2026,"mes":5,"ano_mes":"2026/05","empreendimento":"ARGO","shopping":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Consultoria TI","status":"Fechado","motivo":"Cadu precisa saber sobre a conta do Zoom","solucao":"Cadastrei ele no portal e ele assumiu a conta da Luana","solicitante":"Cadu JLL","data_final":"2026-05-11","task_id":27},{"sub":1,"data":"2026-06-16","ano":2026,"mes":6,"ano_mes":"2026/06","empreendimento":"ARGO","shopping":"ARGO","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Consultoria TI","status":"Fechado","motivo":"Cadu pedindo para verificar o valor da Thinkdigital fornecedor wifi mall e equipamentos","solucao":"O valor é R$ 2.234,80 mês. Locação de equipamento e sistema de Wi-Fi informado ao Cadu. Dados informados pela Amanda e Carolina.","solicitante":"Cadu JLL","data_final":"2026-06-16","task_id":120},{"sub":1,"data":"2026-06-22","ano":2026,"mes":6,"ano_mes":"2026/06","empreendimento":"ARGO","shopping":"ARGO","atividade":"Consultoria/Gerencia Ambiente nuvem Sistema VS","tipo":"Consultoria TI","status":"Fechado","motivo":"Passar administração e cobrança do dominio campinasshopping.com.br para TI Argoplan","solucao":null,"solicitante":"Hugo JLL","data_final":null,"task_id":144}];
-const COLOR='#1a3a5c';
+const RAW=[{"sub":1,"data":"2026-06-12","ano":2026,"mes":6,"ano_mes":"2026/06","empreendimento":"SPL","shopping":"SPL","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Aberto","motivo":"Verificar a necessidade de ter o fonecedor WebLocal, ver quais serviços estão la (R$34,90/mês)","solucao":null,"solicitante":null,"data_final":null,"task_id":111},{"sub":1,"data":"2026-06-23","ano":2026,"mes":6,"ano_mes":"2026/06","empreendimento":"SPL","shopping":"SPL","atividade":"Gerência TI ADM/Consultoria TI/Gerencia Ambiente Nuvem VS","tipo":"Suporte TI","status":"Fechado","motivo":"Enviar boleto pagamento registro parklagos.com.br para o financeiro","solucao":"Email encaminhado","solicitante":"Douglas Hunter","data_final":"2026-06-23","task_id":146}];
+const COLOR='#37474f';
 let filtered=[...RAW],sortCol='data',sortAsc=true,charts={},expanded={};
 function populateFilters(){
   const meses=[...new Set(RAW.map(r=>r.mes))].sort((a,b)=>a-b);
