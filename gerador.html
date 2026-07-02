@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Dashboards TI — Nervia</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+
+/* ── UPLOAD VIEW ─────────────────────────────── */
+#vUpload{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#0f3460 0%,#16213e 100%)}
+.upload-card{background:white;border-radius:20px;padding:48px 56px;max-width:520px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.upload-logo{font-size:3rem;margin-bottom:12px}
+.upload-card h1{font-size:1.6rem;font-weight:800;color:#0f3460;margin-bottom:6px}
+.upload-card p{color:#888;font-size:.9rem;margin-bottom:32px}
+.drop-zone{border:2.5px dashed #c0cfe0;border-radius:14px;padding:36px 24px;cursor:pointer;transition:all .2s;margin-bottom:20px;position:relative}
+.drop-zone:hover,.drop-zone.drag{border-color:#0f3460;background:#f0f5ff}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.drop-icon{font-size:2.4rem;margin-bottom:10px}
+.drop-zone h3{font-size:1rem;font-weight:700;color:#333;margin-bottom:4px}
+.drop-zone p{font-size:.8rem;color:#aaa}
+.btn-upload{display:inline-block;background:linear-gradient(135deg,#0f3460,#16213e);color:white;padding:13px 32px;border-radius:30px;font-size:.95rem;font-weight:700;border:none;cursor:pointer;width:100%;transition:opacity .2s}
+.btn-upload:hover{opacity:.88}
+.upload-hint{margin-top:16px;font-size:.75rem;color:#bbb}
+.upload-progress{display:none;margin-top:16px;color:#0f3460;font-weight:600;font-size:.9rem}
+
+/* ── SHARED HEADER ───────────────────────────── */
+.app-header{background:linear-gradient(135deg,var(--c1,#0f3460) 0%,var(--c2,#16213e) 100%);color:white;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.3);flex-wrap:wrap;gap:12px}
+.app-header h1{font-size:1.3rem;font-weight:700}
+.app-header .sub{font-size:.78rem;opacity:.65;margin-top:3px}
+.header-left{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.emp-tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);padding:5px 16px;border-radius:20px;font-size:.95rem;font-weight:900;letter-spacing:1px}
+.emp-name{font-size:.75rem;opacity:.7}
+.nervia-txt{font-size:.68rem;opacity:.55}
+.btn-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:7px 14px;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;transition:background .2s;text-decoration:none}
+.btn-back:hover{background:rgba(255,255,255,.28)}
+
+/* ── INFO BAR ────────────────────────────────── */
+.info-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.73rem;color:#555}
+.info-bar span b{color:#222}
+
+/* ── INDEX VIEW ──────────────────────────────── */
+#vIndex{display:none} /* controlado por JS */
+.search-bar{display:flex;justify-content:center;margin:26px 24px 6px}
+.search-bar input{width:100%;max-width:460px;padding:11px 20px;border:2px solid #dde;border-radius:30px;font-size:.9rem;outline:none;background:white;box-shadow:0 2px 10px rgba(0,0,0,.07);transition:border-color .2s}
+.search-bar input:focus{border-color:#0f3460}
+.global-stats{display:flex;justify-content:center;gap:28px;margin:14px 0 22px;flex-wrap:wrap}
+.gstat{text-align:center}.gstat .gv{font-size:1.5rem;font-weight:800;color:#0f3460}
+.gstat .gl{font-size:.7rem;color:#999;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.emp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;padding:0 36px 44px;max-width:1280px;margin:0 auto}
+.emp-card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,.09);cursor:pointer;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s;text-decoration:none}
+.emp-card:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(0,0,0,.16)}
+.emp-card:hover .card-footer{opacity:1}
+.card-top{padding:22px 20px 16px;display:flex;flex-direction:column;gap:7px;color:white;min-height:120px;position:relative;overflow:hidden}
+.card-top::after{content:'';position:absolute;right:-18px;bottom:-18px;width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,.1)}
+.card-emp{font-size:1.5rem;font-weight:900;letter-spacing:1px;z-index:1}
+.card-name{font-size:.75rem;opacity:.78;z-index:1;font-weight:500}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.22);color:white;z-index:1;align-self:flex-start}
+.card-body{padding:14px 18px;display:flex;gap:14px}
+.mini-stat{flex:1;text-align:center}
+.mini-stat .mv{font-size:1.25rem;font-weight:800}
+.mini-stat .ml{font-size:.65rem;color:#aaa;font-weight:600;text-transform:uppercase}
+.mini-stat.green .mv{color:#10b981}
+.mini-stat.amber .mv{color:#f59e0b}
+.mini-stat.blue  .mv{color:#0f3460}
+.card-divider{height:1px;background:#f0f0f0;margin:0 18px}
+.card-footer{padding:10px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.76rem;color:#888;opacity:0;transition:opacity .18s;background:#fafafa}
+.card-footer span{font-weight:700;color:#0f3460}
+.empty-msg{display:none;text-align:center;padding:60px;color:#bbb;font-size:.95rem;grid-column:1/-1}
+.btn-zip{display:block;margin:0 auto 24px;background:linear-gradient(135deg,#0f3460,#16213e);color:white;border:none;padding:12px 32px;border-radius:30px;font-size:.88rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn-zip:hover{opacity:.85}
+
+/* ── DASHBOARD VIEW ──────────────────────────── */
+#vDash{display:none}
+.filters{background:white;padding:12px 32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.filter-label{font-size:.76rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.filters select{border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:.82rem;color:#333;background:#fafafa;cursor:pointer;outline:none}
+.btn-reset{background:#0f3460;color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;cursor:pointer}
+.main-content{padding:22px 32px;max-width:1300px;margin:0 auto}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:white;border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--accent)}
+.kpi-value{font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1}
+.kpi-label{font-size:.72rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+.kpi-sub{font-size:.72rem;color:#bbb;margin-top:2px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.chart-card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.chart-card h3{font-size:.78rem;font-weight:700;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0f2f5;padding-bottom:8px}
+.chart-wrap{position:relative;height:220px}
+.section-title{font-size:.9rem;font-weight:800;color:#0f3460;margin:4px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,#0f3460 0%,transparent 100%);border-radius:2px}
+.table-card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.table-hint{font-size:.72rem;color:#999;margin-bottom:10px}
+.table-wrap{max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid #e8e8e8}
+.detail-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.detail-table thead th{background:#0f3460;color:white;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer}
+.detail-table thead th:hover{opacity:.88}
+.detail-table tbody tr:nth-child(even){background:#fafafa}
+.detail-table tbody tr:hover td{background:#eef3ff}
+.detail-table td{padding:7px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700}
+.badge-fechado{background:#d4edda;color:#155724}
+.badge-aberto{background:#fff3cd;color:#856404}
+.badge-andamento{background:#bbdefb;color:#1565c0}
+.badge-suporte{background:#cce5ff;color:#004085}
+.badge-consultoria{background:#e2d9f3;color:#3d1a78}
+.badge-software{background:#d1ecf1;color:#0c5460}
+.task-row.has-subs{cursor:pointer}
+.task-row.has-subs:hover td{background:#f0f4ff}
+.sub-row td{background:#f8f9ff!important;border-left:3px solid #0f3460}
+.expand-icon{font-size:.7rem;color:#0f3460;margin-right:2px}
+.sub-count{display:inline-block;background:#e8ecff;color:#0f3460;border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;margin-left:4px}
+.sub-level-badge{display:inline-block;background:#f0f0f0;color:#666;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700;margin-right:4px}
+.count-badge{margin-left:auto;font-size:.76rem;color:#999}
+
+/* ── FOOTER ──────────────────────────────────── */
+.app-footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px}
+.app-footer strong{color:#555}
+
+@media(max-width:800px){
+  .charts-row{grid-template-columns:1fr}
+  .main-content{padding:14px 14px}
+  .emp-grid{padding:0 14px 36px;gap:12px}
+  .upload-card{padding:32px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ UPLOAD VIEW ══════════════════════════════════════════ -->
+<div id="vUpload">
+  <div class="upload-card">
+    <div class="upload-logo">🏢</div>
+    <h1>Gerador de Dashboards TI</h1>
+    <p>Nervia Tecnologia da Informação</p>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".xlsx,.xls" onchange="handleFileInput(this)">
+      <div class="drop-icon">📊</div>
+      <h3>Arraste o arquivo aqui</h3>
+      <p>ou clique para selecionar</p>
+    </div>
+
+    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+      📂 Selecionar arquivo Excel (.xlsx)
+    </button>
+    <div class="upload-hint">Arquivo: <strong>listadetarefas.xlsx</strong> ou qualquer .xlsx com a mesma estrutura</div>
+    <div class="upload-progress" id="uploadProgress">⏳ Processando...</div>
+  </div>
+</div>
+
+<!-- ══ INDEX VIEW ═══════════════════════════════════════════ -->
+<div id="vIndex">
+  <div class="app-header" style="--c1:#0f3460;--c2:#16213e">
+    <div class="header-left">
+      <div>
+        <h1>🏢 Central de Dashboards TI</h1>
+        <div class="sub">Selecione o empreendimento para visualizar as atividades</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="emp-tag" style="font-size:.8rem">Nervia Tecnologia</span>
+      <button class="btn-back" onclick="goUpload()" style="margin-top:4px">↑ Novo arquivo</button>
+    </div>
+  </div>
+
+  <div class="info-bar" id="idxInfoBar"></div>
+
+  <div class="search-bar">
+    <input type="text" id="searchIdx" placeholder="🔍  Buscar empreendimento..." oninput="filterIndex()">
+  </div>
+
+  <div class="global-stats" id="globalStats"></div>
+
+  <div class="emp-grid" id="empGrid">
+    <div class="empty-msg" id="emptyMsg">Nenhum empreendimento encontrado.</div>
+  </div>
+
+  <div style="text-align:center;padding:0 0 32px">
+    <button class="btn-zip" onclick="downloadZip()">⬇️ Baixar todos os HTMLs (ZIP)</button>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD VIEW ═══════════════════════════════════════ -->
+<div id="vDash">
+  <div class="app-header" id="dashHeader">
+    <div class="header-left">
+      <button class="btn-back" onclick="goIndex()">← Voltar</button>
+      <div>
+        <h1>📋 Relatório de Atividades TI</h1>
+        <div class="sub" id="dashSub"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="emp-tag" id="dashEmpTag"></div>
+      <div class="emp-name" id="dashEmpName"></div>
+      <div class="nervia-txt">Nervia Tecnologia da Informação</div>
+    </div>
+  </div>
+
+  <div class="info-bar" id="dashInfoBar"></div>
+
+  <div class="filters">
+    <span class="filter-label">Filtro</span>
+    <select id="fMes" onchange="applyFilters()"><option value="">Todos os meses</option></select>
+    <select id="fStatus" onchange="applyFilters()"><option value="">Todos os status</option></select>
+    <select id="fTipo" onchange="applyFilters()"><option value="">Todos os tipos</option></select>
+    <button class="btn-reset" onclick="resetFilters()">✕ Limpar</button>
+    <span class="count-badge" id="countBadge"></span>
+  </div>
+
+  <div class="main-content">
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="charts-row">
+      <div class="chart-card"><h3>Evolução Mensal</h3><div class="chart-wrap"><canvas id="chartMes"></canvas></div></div>
+      <div class="chart-card"><h3>Status × Tipo</h3><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
+    </div>
+    <div class="section-title">Detalhamento das Tarefas</div>
+    <div class="table-card">
+      <p class="table-hint">▶ Clique em uma tarefa com múltiplos andamentos para expandir</p>
+      <div class="table-wrap">
+        <table class="detail-table">
+          <thead><tr>
+            <th onclick="sortBy('data')">Data ↕</th>
+            <th onclick="sortBy('mes')">Mês ↕</th>
+            <th onclick="sortBy('tipo')">Tipo ↕</th>
+            <th onclick="sortBy('status')">Status ↕</th>
+            <th>Motivo / Tarefa &nbsp;·&nbsp; <span style="opacity:.7;font-weight:500">💡 Solução</span></th>
+            <th onclick="sortBy('solicitante')">Solicitante ↕</th>
+            <th onclick="sortBy('data_final')">Conclusão ↕</th>
+          </tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-footer" id="dashFooter"></div>
+</div>
+
+<script>
+// ══ CONSTANTS ══════════════════════════════════════════════
+
+const MESES = ['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+const EMP_COLORS = {
+  ARGO:     ['#1a3a5c','#0a1f35'],
+  IGU:      ['#155724','#0a3316'],
+  IMC:      ['#6a0572','#3d0042'],
+  Rio2Pom:  ['#7b3f00','#4a2500'],
+  SCP:      ['#0d47a1','#07305c'],
+  SHD:      ['#4a148c','#2d0b57'],
+  SIP:      ['#006064','#003b3e'],
+  SPS:      ['#bf360c','#7d2208'],
+  STQ:      ['#1b5e20','#0a3810'],
+  SVS:      ['#1a237e','#0d1259'],
+  VSS:      ['#424242','#212121'],
+  BVS:      ['#880e4f','#560027'],
+  CRY:      ['#01579b','#012f5e'],
+  NSP:      ['#004d40','#00251a'],
+};
+const DEF_COLORS = ['#37474f','#1c313a'];
+
+// ══ STATE ══════════════════════════════════════════════════
+
+let S = {
+  rows: [], empMap: {}, byEmp: {},
+  lastDate: null, fileDate: null, genAt: null,
+  emps: []
+};
+let currentEmp = null;
+let filtered = [];
+let sortCol = 'data', sortAsc = true;
+let expanded = {};
+let charts = {};
+
+// ══ UPLOAD ════════════════════════════════════════════════
+
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag');
+  const f = e.dataTransfer.files[0];
+  if(f) processFile(f);
+});
+
+function handleFileInput(input) {
+  if(input.files[0]) processFile(input.files[0]);
+}
+
+function processFile(file) {
+  document.getElementById('uploadProgress').style.display = 'block';
+  S.fileDate = new Date(file.lastModified);
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      parseXlsx(new Uint8Array(e.target.result));
+    } catch(err) {
+      document.getElementById('uploadProgress').style.display = 'none';
+      alert('Erro ao ler o arquivo:\n' + err.message + '\n\nVerifique se o arquivo é um .xlsx válido.');
+      return;
+    }
+    try {
+      showIndex();
+    } catch(err) {
+      document.getElementById('uploadProgress').style.display = 'none';
+      alert('Erro ao exibir os dados:\n' + err.message);
+      console.error(err);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ══ PARSE XLSX ════════════════════════════════════════════
+
+function parseXlsx(data) {
+  const wb = XLSX.read(data, {type:'array', cellDates:true});
+
+  // ── Encontrar a aba de dados (case-insensitive) ──
+  const sheetNames = wb.SheetNames;
+  const dadosName = sheetNames.find(n => n.toLowerCase() === 'dados') || sheetNames[0];
+  const ws = wb.Sheets[dadosName];
+  if(!ws) throw new Error("Nenhuma aba encontrada no arquivo.");
+
+  const allRows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true});
+  if(allRows.length < 2) throw new Error("Arquivo sem dados suficientes.");
+
+  // ── Detectar formato do arquivo ──
+  // Formato A (novo): header na linha 1 com NroChamado, SubNivel, Data...
+  // Formato B (antigo): header em alguma linha com SubNivel na col[1]
+  let colMap = {}; // campo -> índice de coluna
+  let dataStart = 1; // linha onde os dados começam
+
+  const headerRow0 = allRows[0];
+  const isFormatoA = headerRow0 && String(headerRow0[0]||'').toLowerCase().includes('nro');
+
+  if(isFormatoA) {
+    // Detecção dinâmica por nome de cabeçalho (robusto a mudanças de ordem)
+    const hdr = allRows[0].map(h =>
+      String(h||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim()
+    );
+    const fi = (...terms) => {
+      const i = hdr.findIndex(h => terms.some(t => h === t || h.startsWith(t)));
+      return i >= 0 ? i : -1;
+    };
+    const fb = (v, pos) => v >= 0 ? v : pos; // fallback posicional
+    colMap = {
+      nro:     fb(fi('nrochamado','nro chamado','nr chamado','nro'), 0),
+      sub:     fb(fi('subnivel','sub nivel'),                        1),
+      data:    fb(hdr.indexOf('data'),                               2), // indexOf: pega o primeiro 'data' (não 'data final')
+      emp:     fb(fi('empreendimento'),                              3),
+      atv:     fb(fi('atividade'),                                   4),
+      tipo:    fb(hdr.indexOf('tipo'),                               5),
+      status:  fb(hdr.indexOf('status'),                             6),
+      motivo:  fb(fi('motivo'),                                      7),
+      sol:     fb(fi('solicitante'),                                 8),
+      dfinal:  fb(fi('data final','datafinal','conclusao','conclus'),9),
+      solucao: fb(fi('solucao','solucao'),                           10),
+    };
+    dataStart = 1;
+  } else {
+    // Formato antigo: encontrar linha com SubNivel
+    const hIdx = allRows.findIndex(r => r[1] === 'SubNivel');
+    if(hIdx < 0) throw new Error("Estrutura do arquivo não reconhecida. Coluna 'SubNivel' não encontrada.");
+    colMap = {nro:-1, sub:1, data:2, emp:3, atv:4, tipo:5, status:6, motivo:7, sol:8, dfinal:9, anoMes:11, ano:13};
+    dataStart = hIdx + 1;
+  }
+
+  // ── Ler empMap (tabela/Planilha1) ──
+  S.empMap = {};
+  const tabName = sheetNames.find(n =>
+    n.toLowerCase() === 'tabela' || n.toLowerCase().includes('planilha') || n.toLowerCase().includes('table')
+  );
+  if(tabName && tabName !== dadosName) {
+    XLSX.utils.sheet_to_json(wb.Sheets[tabName], {header:1}).forEach(r => {
+      const k = r[1] ? String(r[1]).trim() : null;
+      const v = r[2] ? String(r[2]).trim() : null;
+      if(k && v && k !== 'empreendimento' && k !== 'Shopping') S.empMap[k] = v;
+    });
+  }
+
+  // ── Parsear linhas ──
+  S.rows = [];
+  let autoTaskId = 0;
+  for(let i = dataStart; i < allRows.length; i++) {
+    const r = allRows[i];
+    if(r[colMap.sub] == null && r[colMap.data] == null) continue;
+
+    const sub    = parseInt(r[colMap.sub]) || 1;
+    const nro    = colMap.nro >= 0 ? (parseInt(r[colMap.nro]) || null) : null;
+
+    // task_id: usa NroChamado se disponível, senão incrementa por sub=1
+    if(sub === 1) autoTaskId++;
+    const taskId = nro !== null ? nro : autoTaskId;
+
+    const dt  = parseExcelDate(r[colMap.data]);
+    const df  = parseExcelDate(r[colMap.dfinal]);
+    const mes = dt ? dt.getMonth()+1 : null;
+    const ano = dt ? dt.getFullYear() : (colMap.ano ? parseInt(r[colMap.ano])||null : null);
+    const empStr = r[colMap.emp] ? String(r[colMap.emp]).trim() : '';
+    const solStr = r[colMap.sol] ? String(r[colMap.sol]).trim() : null;
+    const anoMes = (colMap.anoMes && r[colMap.anoMes])
+      ? String(r[colMap.anoMes]).trim()
+      : (ano && mes ? ano+'/'+String(mes).padStart(2,'0') : '');
+
+    if(!empStr) continue;
+
+    S.rows.push({
+      sub, task_id: taskId,
+      data:           dt ? isoDate(dt) : null,
+      data_final:     df ? isoDate(df) : null,
+      ano, mes, ano_mes: anoMes,
+      empreendimento: empStr,
+      atividade:      r[colMap.atv]    ? String(r[colMap.atv]).trim()    : '',
+      tipo:           r[colMap.tipo]   ? String(r[colMap.tipo]).trim()   : '',
+      status:         r[colMap.status] ? String(r[colMap.status]).trim() : '',
+      motivo:         r[colMap.motivo] ? String(r[colMap.motivo]).trim() : '',
+      solicitante:    (solStr && solStr !== 'None' && solStr !== '') ? solStr : null,
+      solucao:        (colMap.solucao >= 0 && r[colMap.solucao]) ? String(r[colMap.solucao]).trim() : null,
+    });
+  }
+
+  if(S.rows.length === 0) throw new Error("Nenhum dado encontrado. Verifique a estrutura do arquivo.");
+
+  // ── Datas e agrupamento ──
+  const dates = S.rows.filter(r=>r.data).map(r=>r.data).sort();
+  S.lastDate = dates.length ? dates[dates.length-1] : null;
+  S.genAt = new Date();
+
+  S.byEmp = {};
+  S.rows.forEach(r => {
+    if(!S.byEmp[r.empreendimento]) S.byEmp[r.empreendimento] = [];
+    S.byEmp[r.empreendimento].push(r);
+  });
+  S.emps = Object.keys(S.byEmp).sort();
+}
+
+function parseExcelDate(v) {
+  if(!v) return null;
+  if(v instanceof Date) return isNaN(v) ? null : v;
+  // String ISO: '2026-01-22' ou '22/01/2026'
+  if(typeof v === 'string') {
+    let d;
+    if(v.match(/^\d{4}-\d{2}-\d{2}/)) {
+      // ISO format: add noon to avoid timezone offset shifting the day
+      d = new Date(v + 'T12:00:00');
+    } else if(v.match(/^\d{2}\/\d{2}\/\d{4}/)) {
+      const [dd,mm,yyyy] = v.split('/');
+      d = new Date(yyyy+'-'+mm+'-'+dd+'T12:00:00');
+    } else {
+      d = new Date(v);
+    }
+    return isNaN(d) ? null : d;
+  }
+  // Excel serial number
+  if(typeof v === 'number' && v > 25000) {
+    return new Date(Math.round((v - 25569) * 86400 * 1000));
+  }
+  return null;
+}
+
+function isoDate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+
+function fmtBR(s) {
+  if(!s) return '—';
+  const p = s.split('-');
+  if(p.length===3) return p[2]+'/'+p[1]+'/'+p[0];
+  return s;
+}
+
+function fmtDateBR(d) {
+  if(!d) return '—';
+  return d.toLocaleDateString('pt-BR');
+}
+
+function fmtDateTime(d) {
+  if(!d) return '—';
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function infoBarHTML() {
+  return '<span>📅 <b>Último registro no Excel:</b> ' + fmtBR(S.lastDate) + '</span>' +
+         '<span>📁 <b>Arquivo atualizado em:</b> ' + fmtDateBR(S.fileDate) + '</span>' +
+         '<span>🕐 <b>Formulários gerados em:</b> ' + fmtDateTime(S.genAt) + '</span>';
+}
+
+function empColors(emp) { return EMP_COLORS[emp] || DEF_COLORS; }
+
+// ══ TASK GROUPING ════════════════════════════════════════
+
+function taskStats(rows) {
+  // group by task_id
+  const byId = {};
+  rows.forEach(r => {
+    if(!byId[r.task_id]) byId[r.task_id] = [];
+    byId[r.task_id].push(r);
+  });
+  const ids = Object.keys(byId);
+  const fechados = ids.filter(id => byId[id].every(r=>r.status==='Fechado')).length;
+  const total = ids.length;
+  return { total, fechados, abertos: total-fechados, byId, ids };
+}
+
+// ══ INDEX VIEW ════════════════════════════════════════════
+
+function showIndex() {
+  show('vIndex');
+  document.getElementById('idxInfoBar').innerHTML = infoBarHTML();
+
+  let totalT=0, totalF=0, totalA=0;
+  const statsPerEmp = {};
+  S.emps.forEach(emp => {
+    const st = taskStats(S.byEmp[emp]);
+    statsPerEmp[emp] = st;
+    totalT += st.total; totalF += st.fechados; totalA += st.abertos;
+  });
+
+  document.getElementById('globalStats').innerHTML =
+    gstat(S.emps.length,'Empreendimentos') +
+    gstat(totalT,'Tarefas Registradas') +
+    gstat(totalF,'Concluídas') +
+    gstat(totalA,'Em Aberto');
+
+  // Build cards
+  const grid = document.getElementById('empGrid');
+  const emptyMsg = document.getElementById('emptyMsg');
+  grid.innerHTML = '';
+  grid.appendChild(emptyMsg);
+  emptyMsg.style.display = 'none';
+
+  S.emps.forEach(emp => {
+    const shopping = S.empMap[emp] || emp;
+    const st = statsPerEmp[emp];
+    const taxa = st.total ? Math.round(st.fechados/st.total*100) : 0;
+    const [c1,c2] = empColors(emp);
+
+    const card = document.createElement('div');
+    card.className = 'emp-card';
+    card.dataset.search = (emp+' '+shopping).toLowerCase();
+    card.onclick = () => showDashboard(emp);
+    card.innerHTML =
+      '<div class="card-top" style="background:linear-gradient(135deg,'+c1+','+c2+')">' +
+        '<div class="card-emp">'+emp+'</div>' +
+        '<div class="card-name">'+shopping+'</div>' +
+        '<span class="pill">'+st.total+' tarefa'+(st.total!==1?'s':'')+'</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div class="mini-stat green"><div class="mv">'+st.fechados+'</div><div class="ml">Fechadas</div></div>' +
+        '<div class="mini-stat amber"><div class="mv">'+st.abertos+'</div><div class="ml">Abertas</div></div>' +
+        '<div class="mini-stat blue"><div class="mv">'+taxa+'%</div><div class="ml">Resolução</div></div>' +
+      '</div>' +
+      '<div class="card-divider"></div>' +
+      '<div class="card-footer"><span>Abrir Dashboard →</span></div>';
+    grid.appendChild(card);
+  });
+}
+
+function gstat(v,l) {
+  return '<div class="gstat"><div class="gv">'+v+'</div><div class="gl">'+l+'</div></div>';
+}
+
+function filterIndex() {
+  const q = document.getElementById('searchIdx').value.toLowerCase();
+  let any = false;
+  document.querySelectorAll('.emp-card').forEach(c => {
+    const show = !q || c.dataset.search.includes(q);
+    c.style.display = show ? '' : 'none';
+    if(show) any = true;
+  });
+  document.getElementById('emptyMsg').style.display = any ? 'none' : 'block';
+}
+
+// ══ DASHBOARD VIEW ═══════════════════════════════════════
+
+function showDashboard(emp) {
+  currentEmp = emp;
+  expanded = {};
+  sortCol = 'data'; sortAsc = true;
+
+  const shopping = S.empMap[emp] || emp;
+  const [c1,c2] = empColors(emp);
+
+  // Header style
+  const hdr = document.getElementById('dashHeader');
+  hdr.style.setProperty('--c1', c1);
+  hdr.style.setProperty('--c2', c2);
+  document.getElementById('dashEmpTag').textContent = emp;
+  document.getElementById('dashEmpName').textContent = shopping;
+  document.getElementById('dashSub').textContent = shopping + ' · Visibilidade por período · Status · Tipo';
+  document.getElementById('dashInfoBar').innerHTML = infoBarHTML();
+
+  // Section title + filter accent color
+  document.querySelector('.section-title').style.color = c1;
+  document.querySelector('.section-title::after');
+  document.querySelector('.btn-reset').style.background = c1;
+  document.querySelectorAll('.detail-table thead th').forEach(th=>th.style.background=c1);
+
+  // Populate filters
+  filtered = [...(S.byEmp[emp] || [])];
+  populateFilters();
+  renderDash();
+
+  // Footer
+  document.getElementById('dashFooter').innerHTML =
+    '<strong>Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Relatório de Controle de Atividades TI &nbsp;·&nbsp; ' +
+    'Último registro: <strong>'+fmtBR(S.lastDate)+'</strong> &nbsp;·&nbsp; ' +
+    'Gerado em: <strong>'+fmtDateTime(S.genAt)+'</strong>';
+
+  show('vDash');
+}
+
+function populateFilters() {
+  const rows = S.byEmp[currentEmp] || [];
+  const meses   = [...new Set(rows.filter(r=>r.mes).map(r=>r.mes))].sort((a,b)=>a-b);
+  const statuses = [...new Set(rows.map(r=>r.status))].sort();
+  const tipos    = [...new Set(rows.map(r=>r.tipo).filter(Boolean))].sort();
+
+  function refill(id, vals, fmt) {
+    const el = document.getElementById(id);
+    el.innerHTML = '<option value="">'+el.options[0].text+'</option>';
+    vals.forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = fmt ? fmt(v) : v;
+      el.appendChild(o);
+    });
+  }
+  refill('fMes', meses, m => MESES[m]||m);
+  refill('fStatus', statuses);
+  refill('fTipo', tipos);
+}
+
+function applyFilters() {
+  const mes    = document.getElementById('fMes').value;
+  const status = document.getElementById('fStatus').value;
+  const tipo   = document.getElementById('fTipo').value;
+  const rows   = S.byEmp[currentEmp] || [];
+  const matchIds = new Set();
+  rows.forEach(r => {
+    if((!mes||r.mes==mes)&&(!status||r.status===status)&&(!tipo||r.tipo===tipo))
+      matchIds.add(r.task_id);
+  });
+  filtered = rows.filter(r=>matchIds.has(r.task_id));
+  renderDash();
+}
+
+function resetFilters() {
+  ['fMes','fStatus','fTipo'].forEach(id=>document.getElementById(id).value='');
+  filtered = [...(S.byEmp[currentEmp]||[])];
+  renderDash();
+}
+
+function renderDash() { renderKPIs(); renderCharts(); renderTable(); }
+
+// ── KPIs ────────────────────────────────────────
+
+function renderKPIs() {
+  const [c1] = empColors(currentEmp);
+  const st = taskStats(filtered);
+  const taxa = st.total ? Math.round(st.fechados/st.total*100) : 0;
+  const nMeses = new Set(filtered.filter(r=>r.mes).map(r=>r.mes)).size;
+
+  const kpis = [
+    {v:st.total,   l:'Tarefas (chamados)',sub:nMeses+' mes(es)',    a:c1},
+    {v:st.fechados,l:'Concluídas',        sub:taxa+'% do total',   a:'#10b981'},
+    {v:st.abertos, l:'Em Aberto',          sub:'pendentes',          a:'#f59e0b'},
+    {v:taxa+'%',   l:'Taxa Resolução',     sub:'fechado / total',    a:'#6366f1'},
+  ];
+  document.getElementById('kpiRow').innerHTML = kpis.map(k=>
+    '<div class="kpi-card" style="--accent:'+k.a+'"><div class="kpi-value">'+k.v+
+    '</div><div class="kpi-label">'+k.l+'</div><div class="kpi-sub">'+k.sub+'</div></div>'
+  ).join('');
+
+  const parents = filtered.filter(r=>r.sub===1);
+  document.getElementById('countBadge').textContent = parents.length+' chamados · '+filtered.length+' andamentos';
+}
+
+// ── Charts ──────────────────────────────────────
+
+function killChart(id) { if(charts[id]){charts[id].destroy();delete charts[id];} }
+
+function renderCharts() {
+  const [c1] = empColors(currentEmp);
+  const monthKey = r => r.ano+'-'+String(r.mes).padStart(2,'0');
+  const monthLabel = m => { const p=m.split('-'); return MESES[parseInt(p[1])]+'/'+p[0].slice(2); };
+  const monthKeys = [...new Set(filtered.filter(r=>r.mes&&r.ano).map(monthKey))].sort();
+  const st = taskStats(filtered);
+
+  killChart('chartMes');
+  charts['chartMes'] = new Chart(document.getElementById('chartMes'),{
+    type:'bar',
+    data:{labels:monthKeys.map(monthLabel), datasets:[
+      {label:'Chamados',
+       data:monthKeys.map(m=>filtered.filter(r=>r.sub===1&&monthKey(r)===m).length),
+       backgroundColor:c1+'cc',borderRadius:6},
+      {label:'Fechados',
+       data:monthKeys.map(m=>{
+         const ids=[...new Set(filtered.filter(r=>r.sub===1&&monthKey(r)===m).map(r=>r.task_id))];
+         return ids.filter(id=>st.byId[id]&&st.byId[id].every(r=>r.status==='Fechado')).length;
+       }),backgroundColor:'#10b981cc',borderRadius:6}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
+  });
+
+  killChart('chartStatus');
+  const tipos = [...new Set(filtered.map(r=>r.tipo).filter(Boolean))];
+  charts['chartStatus'] = new Chart(document.getElementById('chartStatus'),{
+    type:'bar',
+    data:{labels:tipos, datasets:[
+      {label:'Fechado',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Fechado').length),backgroundColor:'#10b981',borderRadius:5},
+      {label:'Aberto', data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Aberto').length), backgroundColor:'#f59e0b',borderRadius:5}
+    ]},
+    options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}
+  });
+}
+
+// ── Table ───────────────────────────────────────
+
+function sortBy(col) {
+  if(sortCol===col) sortAsc=!sortAsc; else{sortCol=col;sortAsc=true;}
+  renderTable();
+}
+
+function toggleRow(tid) { expanded[tid]=!expanded[tid]; renderTable(); }
+
+function tipoBadge(t) {
+  if(!t) return '';
+  const cls = t==='Suporte TI'?'badge-suporte':t==='Consultoria TI'?'badge-consultoria':'badge-software';
+  return '<span class="badge '+cls+'">'+t+'</span>';
+}
+function statusBadge(s) {
+  const cls = s==='Fechado' ? 'badge-fechado'
+            : (s||'').toLowerCase().includes('andamento') ? 'badge-andamento'
+            : 'badge-aberto';
+  return '<span class="badge '+cls+'">'+(s||'—')+'</span>';
+}
+
+function renderTable() {
+  const st = taskStats(filtered);
+  const ids = [...st.ids];
+
+  ids.sort((a,b) => {
+    const ra=st.byId[a][0], rb=st.byId[b][0];
+    const va=ra[sortCol]!=null?ra[sortCol]:'', vb=rb[sortCol]!=null?rb[sortCol]:'';
+    if(typeof va==='number') return sortAsc?va-vb:vb-va;
+    return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));
+  });
+
+  let html='';
+  ids.forEach(tid => {
+    const rows=st.byId[tid];
+    const p=rows[0];
+    const hasSubs=rows.length>1;
+    const exp=expanded[tid];
+    const allF=rows.every(r=>r.status==='Fechado');
+    const tStatus=allF?'Fechado':(rows.find(r=>r.status!=='Fechado')||rows[0]).status||'Aberto';
+
+    html+='<tr class="task-row'+(hasSubs?' has-subs':'')+'"'+(hasSubs?' onclick="toggleRow('+tid+')"':'')+' >';
+    html+='<td style="white-space:nowrap">'+(p.data||'')+'</td>';
+    html+='<td>'+(MESES[p.mes]||p.mes||'')+'</td>';
+    html+='<td>'+tipoBadge(p.tipo)+'</td>';
+    html+='<td>'+statusBadge(tStatus)+'</td>';
+    html+='<td style="max-width:320px">';
+    if(hasSubs) html+='<span class="expand-icon">'+(exp?'▼':'▶')+'</span> ';
+    html+=escHtml(p.motivo||'');
+    if(hasSubs) html+=' <span class="sub-count">'+rows.length+' andamentos</span>';
+    // Solução: mostrada para tarefas fechadas
+    const bestSolucao = rows.map(r=>r.solucao).find(s=>s); // pega 1ª solução disponível
+    if(tStatus==='Fechado' && bestSolucao)
+      html+='<br><span style="font-size:.72rem;color:#155724;background:#d4edda;padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block">💡 '+escHtml(bestSolucao)+'</span>';
+    html+='</td>';
+    html+='<td>'+(p.solicitante||'—')+'</td>';
+    html+='<td style="white-space:nowrap">'+(p.data_final||'—')+'</td>';
+    html+='</tr>';
+
+    if(hasSubs&&exp) {
+      for(let i=1;i<rows.length;i++) {
+        const r=rows[i];
+        html+='<tr class="sub-row">';
+        html+='<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data||'')+'</td>';
+        html+='<td style="color:#888;font-size:.75rem">'+(MESES[r.mes]||r.mes||'')+'</td>';
+        html+='<td>'+tipoBadge(r.tipo)+'</td>';
+        html+='<td>'+statusBadge(r.status)+'</td>';
+        html+='<td style="max-width:320px"><span class="sub-level-badge">Andamento '+r.sub+'</span>'+escHtml(r.motivo||'');
+        if(r.status==='Fechado'&&r.solucao)
+          html+='<br><span style="font-size:.72rem;color:#155724;background:#d4edda;padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block">💡 '+escHtml(r.solucao)+'</span>';
+        html+='</td>';
+        html+='<td style="color:#888;font-size:.75rem">'+(r.solicitante||'—')+'</td>';
+        html+='<td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data_final||'—')+'</td>';
+        html+='</tr>';
+      }
+    }
+  });
+
+  document.getElementById('tableBody').innerHTML = html ||
+    '<tr><td colspan="7" style="text-align:center;padding:30px;color:#aaa">Nenhuma tarefa encontrada.</td></tr>';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══ DOWNLOAD ZIP ══════════════════════════════════════════
+
+function downloadZip() {
+  if(!window.JSZip) { alert('JSZip não carregado.'); return; }
+  const zip = new JSZip();
+  const genStr = fmtDateTime(S.genAt);
+  const lastStr = fmtBR(S.lastDate);
+  const fileStr = fmtDateBR(S.fileDate);
+
+  S.emps.forEach(emp => {
+    const shopping = S.empMap[emp]||emp;
+    const rows = S.byEmp[emp]||[];
+    const html = buildDashboardHTML(emp, shopping, rows, lastStr, fileStr, genStr);
+    zip.file('dashboard_'+emp+'.html', html);
+  });
+  zip.file('index.html', buildIndexHTML(lastStr, fileStr, genStr));
+
+  zip.generateAsync({type:'blob'}).then(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'dashboards_TI_'+new Date().toISOString().slice(0,10)+'.zip';
+    a.click();
+  });
+}
+
+function buildInfoBar(last, fileD, gen) {
+  return '<div style="background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.73rem;color:#555">' +
+    '<span>📅 <b>Último registro no Excel:</b> '+last+'</span>' +
+    '<span>📁 <b>Arquivo atualizado em:</b> '+fileD+'</span>' +
+    '<span>🕐 <b>Formulário gerado em:</b> '+gen+'</span>' +
+  '</div>';
+}
+
+function buildDashboardHTML(emp, shopping, rows, last, fileD, gen) {
+  const [c1,c2] = empColors(emp);
+  const rawJson = JSON.stringify(rows.map(r=>({
+    sub:r.sub, data:r.data, ano:r.ano, mes:r.mes, ano_mes:r.ano_mes,
+    empreendimento:r.empreendimento, shopping:shopping,
+    atividade:r.atividade, tipo:r.tipo, status:r.status,
+    motivo:r.motivo, solucao:r.solucao||null, solicitante:r.solicitante,
+    data_final:r.data_final, task_id:r.task_id
+  })));
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI — ${shopping}</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e}
+.header{background:linear-gradient(135deg,${c1} 0%,${c2} 100%);color:white;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.3);flex-wrap:wrap;gap:12px}
+.header-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.back-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:white;padding:7px 14px;border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s}
+.back-btn:hover{background:rgba(255,255,255,.25)}
+.header h1{font-size:1.3rem;font-weight:700}
+.header .sub{font-size:.78rem;opacity:.65;margin-top:3px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.emp-tag{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);padding:5px 16px;border-radius:20px;font-size:.95rem;font-weight:900;letter-spacing:1px}
+.emp-name{font-size:.75rem;opacity:.7}.nervia{font-size:.68rem;opacity:.55}
+.info-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 32px;display:flex;gap:24px;flex-wrap:wrap;font-size:.73rem;color:#555}
+.info-bar span b{color:#222}
+.filters{background:white;padding:12px 32px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;border-bottom:1px solid #e0e0e0;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.filter-label{font-size:.76rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px}
+.filters select{border:1.5px solid #e0e0e0;border-radius:8px;padding:6px 12px;font-size:.82rem;color:#333;background:#fafafa;cursor:pointer;outline:none}
+.filters select:focus{border-color:${c1}}
+.btn-reset{background:${c1};color:white;border:none;border-radius:8px;padding:7px 14px;font-size:.78rem;font-weight:700;cursor:pointer}
+.main{padding:22px 32px;max-width:1300px;margin:0 auto}
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.kpi-card{background:white;border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.07);border-left:4px solid var(--accent)}
+.kpi-value{font-size:1.8rem;font-weight:800;color:var(--accent);line-height:1}
+.kpi-label{font-size:.72rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+.kpi-sub{font-size:.72rem;color:#bbb;margin-top:2px}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.card{background:white;border-radius:12px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.card h3{font-size:.78rem;font-weight:700;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;border-bottom:2px solid #f0f2f5;padding-bottom:8px}
+.chart-wrap{position:relative;height:220px}
+.section-title{font-size:.9rem;font-weight:800;color:${c1};margin:4px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title::after{content:'';flex:1;height:2px;background:linear-gradient(to right,${c1} 0%,transparent 100%);border-radius:2px}
+.table-wrap{max-height:500px;overflow-y:auto;border-radius:10px;border:1px solid #e8e8e8}
+.detail-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.detail-table thead th{background:${c1};color:white;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer}
+.detail-table thead th:hover{opacity:.88}
+.detail-table tbody tr:nth-child(even){background:#fafafa}
+.detail-table tbody tr:hover td{background:#eef3ff}
+.detail-table td{padding:7px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700}
+.badge-fechado{background:#d4edda;color:#155724}.badge-aberto{background:#fff3cd;color:#856404}.badge-andamento{background:#bbdefb;color:#1565c0}
+.badge-suporte{background:#cce5ff;color:#004085}.badge-consultoria{background:#e2d9f3;color:#3d1a78}.badge-software{background:#d1ecf1;color:#0c5460}
+footer{text-align:center;padding:18px 32px;font-size:.72rem;color:#aaa;border-top:1px solid #e8e8e8;margin-top:8px}
+.task-row.has-subs{cursor:pointer}.task-row.has-subs:hover td{background:#f0f4ff}
+.sub-row td{background:#f8f9ff;border-left:3px solid ${c1}}
+.expand-icon{font-size:.7rem;color:${c1};margin-right:2px}
+.sub-count{display:inline-block;background:#e8ecff;color:${c1};border-radius:10px;padding:1px 7px;font-size:.66rem;font-weight:700;margin-left:4px}
+.sub-level-badge{display:inline-block;background:#f0f0f0;color:#666;border-radius:10px;padding:1px 7px;font-size:.65rem;font-weight:700;margin-right:4px}
+@media(max-width:800px){.charts-row{grid-template-columns:1fr}.main{padding:14px}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <a class="back-btn" href="index.html">← Voltar</a>
+    <div><h1>📋 Relatório de Atividades TI</h1><div class="sub">${shopping} &nbsp;·&nbsp; Visibilidade por período · Status · Tipo</div></div>
+  </div>
+  <div class="header-right">
+    <div class="emp-tag">${emp}</div>
+    <div class="emp-name">${shopping}</div>
+    <div class="nervia">Nervia Tecnologia da Informação</div>
+  </div>
+</div>
+<div class="info-bar">
+  <span>📅 <b>Último registro no Excel:</b> ${last}</span>
+  <span>📁 <b>Arquivo atualizado em:</b> ${fileD}</span>
+  <span>🕐 <b>Formulário gerado em:</b> ${gen}</span>
+</div>
+<div class="filters">
+  <span class="filter-label">Filtro</span>
+  <select id="filterMes"><option value="">Todos os meses</option></select>
+  <select id="filterStatus"><option value="">Todos os status</option></select>
+  <select id="filterTipo"><option value="">Todos os tipos</option></select>
+  <button class="btn-reset" onclick="resetFilters()">✕ Limpar</button>
+  <span style="margin-left:auto;font-size:.76rem;color:#999" id="countBadge"></span>
+</div>
+<div class="main">
+  <div class="kpi-row" id="kpiRow"></div>
+  <div class="charts-row">
+    <div class="card"><h3>Evolução Mensal</h3><div class="chart-wrap"><canvas id="chartMes"></canvas></div></div>
+    <div class="card"><h3>Status × Tipo</h3><div class="chart-wrap"><canvas id="chartStatus"></canvas></div></div>
+  </div>
+  <div class="section-title">Detalhamento das Tarefas</div>
+  <div class="card">
+    <p style="font-size:.72rem;color:#999;margin-bottom:10px">▶ Clique em uma tarefa com múltiplos andamentos para expandir</p>
+    <div class="table-wrap">
+      <table class="detail-table">
+        <thead><tr>
+          <th onclick="sortTable('data')">Data ↕</th><th onclick="sortTable('mes')">Mês ↕</th>
+          <th onclick="sortTable('tipo')">Tipo ↕</th><th onclick="sortTable('status')">Status ↕</th>
+          <th>Motivo / Tarefa &nbsp;·&nbsp; <span style="opacity:.7;font-weight:500">💡 Solução</span></th><th onclick="sortTable('solicitante')">Solicitante ↕</th>
+          <th onclick="sortTable('data_final')">Conclusão ↕</th>
+        </tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<footer><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Relatório de Controle de Atividades TI &nbsp;·&nbsp; Último registro: <strong>${last}</strong> &nbsp;·&nbsp; Gerado em: <strong>${gen}</strong></footer>
+<script>
+const MESES=['','Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const RAW=${rawJson};
+const COLOR='${c1}';
+let filtered=[...RAW],sortCol='data',sortAsc=true,charts={},expanded={};
+function populateFilters(){
+  const meses=[...new Set(RAW.map(r=>r.mes))].sort((a,b)=>a-b);
+  const statuses=[...new Set(RAW.map(r=>r.status))].sort();
+  const tipos=[...new Set(RAW.map(r=>r.tipo).filter(Boolean))].sort();
+  function sel(id,vals,fmt){const el=document.getElementById(id);vals.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=fmt?fmt(v):v;el.appendChild(o);});}
+  sel('filterMes',meses,m=>MESES[m]||m);sel('filterStatus',statuses);sel('filterTipo',tipos);
+  ['filterMes','filterStatus','filterTipo'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+}
+function applyFilters(){var mes=document.getElementById('filterMes').value,status=document.getElementById('filterStatus').value,tipo=document.getElementById('filterTipo').value,ids=new Set();RAW.forEach(r=>{if((!mes||r.mes==mes)&&(!status||r.status===status)&&(!tipo||r.tipo===tipo))ids.add(r.task_id);});filtered=RAW.filter(r=>ids.has(r.task_id));renderAll();}
+function resetFilters(){['filterMes','filterStatus','filterTipo'].forEach(id=>document.getElementById(id).value='');filtered=[...RAW];renderAll();}
+function taskStats(rows){var byId={};rows.forEach(r=>{if(!byId[r.task_id])byId[r.task_id]=[];byId[r.task_id].push(r);});var ids=Object.keys(byId);var f=ids.filter(id=>byId[id].every(r=>r.status==='Fechado')).length;return{total:ids.length,fechados:f,abertos:ids.length-f,byId,ids};}
+function renderKPI(){var st=taskStats(filtered);var taxa=st.total?Math.round(st.fechados/st.total*100):0;var nm=new Set(filtered.filter(r=>r.mes).map(r=>r.mes)).size;var kpis=[{v:st.total,l:'Tarefas (chamados)',s:nm+' mes(es)',a:COLOR},{v:st.fechados,l:'Concluídas',s:taxa+'% do total',a:'#10b981'},{v:st.abertos,l:'Em Aberto',s:'pendentes',a:'#f59e0b'},{v:taxa+'%',l:'Taxa Resolução',s:'fechado / total',a:'#6366f1'}];document.getElementById('kpiRow').innerHTML=kpis.map(k=>'<div class="kpi-card" style="--accent:'+k.a+'"><div class="kpi-value">'+k.v+'</div><div class="kpi-label">'+k.l+'</div><div class="kpi-sub">'+k.s+'</div></div>').join('');document.getElementById('countBadge').textContent=filtered.filter(r=>r.sub===1).length+' chamados · '+filtered.length+' andamentos';}
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function renderCharts(){var mk=r=>r.ano+'-'+String(r.mes).padStart(2,'0');var ml=m=>{var p=m.split('-');return MESES[parseInt(p[1])]+'/'+p[0].slice(2);};var st=taskStats(filtered);var mks=[...new Set(filtered.filter(r=>r.mes&&r.ano).map(mk))].sort();dc('chartMes');charts['chartMes']=new Chart(document.getElementById('chartMes'),{type:'bar',data:{labels:mks.map(ml),datasets:[{label:'Chamados',data:mks.map(m=>filtered.filter(r=>r.sub===1&&mk(r)===m).length),backgroundColor:COLOR+'cc',borderRadius:6},{label:'Fechados',data:mks.map(m=>{var ids=[...new Set(filtered.filter(r=>r.sub===1&&mk(r)===m).map(r=>r.task_id))];return ids.filter(id=>st.byId[id]&&st.byId[id].every(r=>r.status==='Fechado')).length;}),backgroundColor:'#10b981cc',borderRadius:6}]},options:{plugins:{legend:{position:'bottom'}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}});dc('chartStatus');var tipos=[...new Set(filtered.map(r=>r.tipo).filter(Boolean))];charts['chartStatus']=new Chart(document.getElementById('chartStatus'),{type:'bar',data:{labels:tipos,datasets:[{label:'Fechado',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Fechado').length),backgroundColor:'#10b981',borderRadius:5},{label:'Aberto',data:tipos.map(t=>filtered.filter(r=>r.tipo===t&&r.status==='Aberto').length),backgroundColor:'#f59e0b',borderRadius:5}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{stepSize:1}}},responsive:true,maintainAspectRatio:false}});}
+function toggleTask(tid){expanded[tid]=!expanded[tid];renderTable();}
+function sortTable(col){if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=true;}renderTable();}
+function tipoBadge(t){if(!t)return'';var cls=t==='Suporte TI'?'badge-suporte':t==='Consultoria TI'?'badge-consultoria':'badge-software';return'<span class="badge '+cls+'">'+t+'</span>';}
+function statusBadge(s){var cls=s==='Fechado'?'badge-fechado':(s||'').toLowerCase().includes('andamento')?'badge-andamento':'badge-aberto';return'<span class="badge '+cls+'">'+(s||'—')+'</span>';}
+function renderTable(){var st=taskStats(filtered);var ids=[...st.ids];ids.sort((a,b)=>{var ra=st.byId[a][0],rb=st.byId[b][0];var va=ra[sortCol]!=null?ra[sortCol]:'',vb=rb[sortCol]!=null?rb[sortCol]:'';if(typeof va==='number')return sortAsc?va-vb:vb-va;return sortAsc?String(va).localeCompare(String(vb)):String(vb).localeCompare(String(va));});var html='';ids.forEach(tid=>{var rows=st.byId[tid];var p=rows[0];var hs=rows.length>1;var exp=expanded[tid];var allF=rows.every(r=>r.status==='Fechado');html+='<tr class="task-row'+(hs?' has-subs':'')+'"'+(hs?' onclick="toggleTask('+tid+')"':'')+' >';var bestSol=rows.map(function(r){return r.solucao;}).find(function(s){return s;});var solTag=function(s){return s?'<br><span style="font-size:.72rem;color:#155724;background:#d4edda;padding:2px 7px;border-radius:4px;margin-top:4px;display:inline-block">💡 '+String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</span>':'';};var tSt=allF?'Fechado':(rows.find(r=>r.status!=='Fechado')||rows[0]).status||'Aberto';html+='<td style="white-space:nowrap">'+(p.data||'')+'</td><td>'+(MESES[p.mes]||p.mes||'')+'</td><td>'+tipoBadge(p.tipo)+'</td><td>'+statusBadge(tSt)+'</td><td style="max-width:320px">'+(hs?'<span class="expand-icon">'+(exp?'▼':'▶')+'</span> ':'')+String(p.motivo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+(hs?' <span class="sub-count">'+rows.length+' andamentos</span>':'')+(allF?solTag(bestSol):'')+'</td><td>'+(p.solicitante||'—')+'</td><td style="white-space:nowrap">'+(p.data_final||'—')+'</td></tr>';if(hs&&exp){for(var i=1;i<rows.length;i++){var r=rows[i];html+='<tr class="sub-row"><td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data||'')+'</td><td style="color:#888;font-size:.75rem">'+(MESES[r.mes]||r.mes||'')+'</td><td>'+tipoBadge(r.tipo)+'</td><td>'+statusBadge(r.status)+'</td><td style="max-width:320px"><span class="sub-level-badge">Andamento '+r.sub+'</span>'+String(r.motivo||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')+(r.status==='Fechado'?solTag(r.solucao):'')+'</td><td style="color:#888;font-size:.75rem">'+(r.solicitante||'—')+'</td><td style="white-space:nowrap;color:#888;font-size:.75rem">'+(r.data_final||'—')+'</td></tr>';}}});document.getElementById('tableBody').innerHTML=html||'<tr><td colspan="7" style="text-align:center;padding:30px;color:#aaa">Nenhuma tarefa encontrada.</td></tr>';}
+function renderAll(){renderKPI();renderCharts();renderTable();}
+populateFilters();renderAll();
+<\/script>
+</body>
+</html>`;
+}
+
+function buildIndexHTML(last, fileD, gen) {
+  let cards = '';
+  let totalT=0,totalF=0,totalA=0;
+  S.emps.forEach(emp => {
+    const shopping = S.empMap[emp]||emp;
+    const st = taskStats(S.byEmp[emp]||[]);
+    const taxa = st.total?Math.round(st.fechados/st.total*100):0;
+    const [c1,c2] = empColors(emp);
+    totalT+=st.total; totalF+=st.fechados; totalA+=st.abertos;
+    cards += `
+  <a class="card" href="dashboard_${emp}.html">
+    <div class="card-top" style="background:linear-gradient(135deg,${c1},${c2})">
+      <div class="card-emp">${emp}</div>
+      <div class="card-name">${shopping}</div>
+      <span class="pill">${st.total} tarefa${st.total!==1?'s':''}</span>
+    </div>
+    <div class="card-body">
+      <div class="mini-stat green"><div class="mv">${st.fechados}</div><div class="ml">Fechadas</div></div>
+      <div class="mini-stat amber"><div class="mv">${st.abertos}</div><div class="ml">Abertas</div></div>
+      <div class="mini-stat blue"><div class="mv">${taxa}%</div><div class="ml">Resolução</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card-footer"><span>Abrir Dashboard →</span></div>
+  </a>`;
+  });
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TI — Central de Dashboards</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+.header{background:linear-gradient(135deg,#0f3460 0%,#16213e 100%);color:white;padding:28px 44px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;box-shadow:0 4px 24px rgba(0,0,0,.35)}
+.header h1{font-size:1.8rem;font-weight:800}.header p{font-size:.85rem;opacity:.65;margin-top:5px}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.nervia-badge{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);padding:6px 16px;border-radius:20px;font-size:.82rem;font-weight:600}
+.info-bar{background:#f8f9fa;border-bottom:1px solid #e0e0e0;padding:7px 44px;display:flex;gap:28px;flex-wrap:wrap;font-size:.74rem;color:#555}
+.info-bar span b{color:#222}
+.search-bar{display:flex;justify-content:center;margin:26px 24px 6px}
+.search-bar input{width:100%;max-width:460px;padding:11px 20px;border:2px solid #dde;border-radius:30px;font-size:.9rem;outline:none;background:white;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.search-bar input:focus{border-color:#0f3460}
+.stats{display:flex;justify-content:center;gap:30px;margin:16px 0 24px;flex-wrap:wrap}
+.stat{text-align:center}.stat .val{font-size:1.55rem;font-weight:800;color:#0f3460}.stat .lbl{font-size:.7rem;color:#999;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px;padding:0 36px 44px;max-width:1280px;margin:0 auto}
+.card{background:white;border-radius:14px;overflow:hidden;box-shadow:0 3px 14px rgba(0,0,0,.09);transition:transform .18s,box-shadow .18s;cursor:pointer;text-decoration:none;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(0,0,0,.16)}.card:hover .card-footer{opacity:1}
+.card-top{padding:22px 20px 16px;display:flex;flex-direction:column;gap:7px;color:white;min-height:120px;position:relative;overflow:hidden}
+.card-emp{font-size:1.5rem;font-weight:900;letter-spacing:1px;z-index:1}.card-name{font-size:.75rem;opacity:.78;z-index:1;font-weight:500}
+.card-body{padding:14px 18px;display:flex;gap:14px}
+.mini-stat{flex:1;text-align:center}.mini-stat .mv{font-size:1.25rem;font-weight:800}.mini-stat .ml{font-size:.65rem;color:#aaa;font-weight:600;text-transform:uppercase}
+.mini-stat.green .mv{color:#10b981}.mini-stat.amber .mv{color:#f59e0b}.mini-stat.blue .mv{color:#0f3460}
+.divider{height:1px;background:#f0f0f0;margin:0 18px}
+.card-footer{padding:10px 18px;display:flex;align-items:center;justify-content:space-between;font-size:.76rem;color:#888;opacity:0;transition:opacity .18s;background:#fafafa}
+.card-footer span{font-weight:700;color:#0f3460}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.22);color:white;z-index:1;align-self:flex-start}
+footer{text-align:center;padding:20px;font-size:.72rem;color:#aaa;border-top:1px solid #e0e0e0}
+</style>
+</head>
+<body>
+<div class="header">
+  <div><h1>🏢 Central de Dashboards TI</h1><p>Selecione o empreendimento para visualizar as atividades</p></div>
+  <div class="header-right"><span class="nervia-badge">Nervia Tecnologia da Informação</span></div>
+</div>
+<div class="info-bar">
+  <span>📅 <b>Último registro no Excel:</b> ${last}</span>
+  <span>📁 <b>Arquivo atualizado em:</b> ${fileD}</span>
+  <span>🕐 <b>Formulários gerados em:</b> ${gen}</span>
+</div>
+<div class="search-bar"><input type="text" id="s" placeholder="🔍  Buscar empreendimento..." oninput="fc()"></div>
+<div class="stats">
+  <div class="stat"><div class="val">${S.emps.length}</div><div class="lbl">Empreendimentos</div></div>
+  <div class="stat"><div class="val">${totalT}</div><div class="lbl">Tarefas Registradas</div></div>
+  <div class="stat"><div class="val">${totalF}</div><div class="lbl">Concluídas</div></div>
+  <div class="stat"><div class="val">${totalA}</div><div class="lbl">Em Aberto</div></div>
+</div>
+<div class="grid" id="g">${cards}</div>
+<footer><strong style="color:#555">Nervia Tecnologia da Informação</strong> &nbsp;·&nbsp; Último registro: <strong>${last}</strong> &nbsp;·&nbsp; Gerado em: <strong>${gen}</strong></footer>
+<script>function fc(){var q=document.getElementById('s').value.toLowerCase();document.querySelectorAll('#g .card').forEach(c=>{c.style.display=!q||c.innerText.toLowerCase().includes(q)?'':'none';});}<\/script>
+</body>
+</html>`;
+}
+
+// ══ NAVIGATION ════════════════════════════════════════════
+
+const VIEW_DISPLAY = {vUpload:'flex', vIndex:'block', vDash:'block'};
+function show(id) {
+  ['vUpload','vIndex','vDash'].forEach(v => {
+    document.getElementById(v).style.display = v===id ? VIEW_DISPLAY[v] : 'none';
+  });
+  if(id !== 'vDash') { killChart('chartMes'); killChart('chartStatus'); }
+}
+
+function goUpload() { show('vUpload'); document.getElementById('fileInput').value=''; }
+function goIndex()  { show('vIndex'); }
+</script>
+</body>
+</html>
